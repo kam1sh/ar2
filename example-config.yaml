@@ -1,0 +1,8 @@
+listen:
+  host: localhost
+  port: 8080
+
+storage:
+  path: /tmp/packages
+  maxFileSize: 4G
+
