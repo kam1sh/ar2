@@ -5,6 +5,8 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.http4k.core.*
 import org.http4k.core.Method.POST
+import org.http4k.filter.GzipCompressionMode
+import org.http4k.filter.ServerFilters
 import org.http4k.lens.MultipartFormFile
 import org.http4k.lens.Validator
 import org.http4k.lens.multipartForm
@@ -25,19 +27,21 @@ import java.nio.file.Files
 
 val modules = module {
     single { SecurityServiceImpl() as SecurityService }
-    single { Upload(get()) }
+    single { Upload() }
 }
 
 class App : KoinComponent {
 
-//    val securityService by inject<SecurityService>()
+    lateinit var config: Config
 
     val upload by inject<Upload>()
 
     fun getHandler(): HttpHandler {
-        return routes(
-                "/py/upload" bind POST to upload()
-        )
+        return ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming).then(routes(
+                "/py/upload" bind POST to ServerFilters.BasicAuth("Anchor2 authentication",
+                        { authorize: Credentials -> authorize == Credentials("0", "1") }
+                ).then(upload())
+        ))
     }
 
     fun loadConfig(fileName: String): Config {
@@ -45,24 +49,19 @@ class App : KoinComponent {
         return Files.newBufferedReader(FileSystems.getDefault().getPath(fileName)).use { mapper.readValue(it, Config::class.java) }
     }
 
-    fun startServer(port: Int): Http4kServer {
-        val server = getHandler().asServer(Undertow(port))
-        println("Server started!")
+    fun startServer(): Http4kServer {
+        val server = getHandler().asServer(Undertow(config.listen.port));
+        println("Launching server at port ${config.listen.port}")
         return server.start()
     }
 }
 
-class Upload(val securityService: SecurityService) {
+class Upload() {
     private val files = MultipartFormFile.multi.required("file")
     private val form = Body.multipartForm(Validator.Strict, files).toLens()
 
     operator fun invoke(): HttpHandler = { request ->
-        if (!securityService.isAuthorized(request)) {
-            Response(Status.UNAUTHORIZED)
-        } else {
-
-            Response(Status.OK).body("Uploaded!\n")
-        }
+        Response(Status.OK).body("Uploaded!\n")
     }
 }
 
@@ -71,7 +70,6 @@ fun main(args: Array<String>) {
     val app = App()
     val fileName: String
     fileName = if (args.isEmpty()) "example-config.yaml" else args[0]
-    val cfg = app.loadConfig(fileName)
-
-    app.startServer(cfg.listen.port).block()
+    app.config = app.loadConfig(fileName)
+    app.startServer().block()
 }
