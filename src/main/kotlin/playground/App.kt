@@ -7,18 +7,17 @@ import org.http4k.core.*
 import org.http4k.core.Method.POST
 import org.http4k.filter.GzipCompressionMode
 import org.http4k.filter.ServerFilters
-import org.http4k.lens.MultipartFormFile
-import org.http4k.lens.Validator
-import org.http4k.lens.multipartForm
 import org.http4k.routing.bind
 import org.http4k.routing.routes
 import org.http4k.server.Http4kServer
 import org.http4k.server.Undertow
 import org.http4k.server.asServer
+import org.koin.core.Koin
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.inject
 import org.koin.dsl.module
+import playground.pypi.Upload
 import playground.security.SecurityService
 import playground.security.SecurityServiceImpl
 import java.nio.file.FileSystems
@@ -34,14 +33,16 @@ class App : KoinComponent {
 
     lateinit var config: Config
 
-    val upload by inject<Upload>()
+    val pypiUpload by inject<Upload>()
 
     fun getHandler(): HttpHandler {
         return ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming).then(routes(
                 "/py/upload" bind POST to ServerFilters.BasicAuth("Anchor2 authentication",
-                        { authorize: Credentials -> authorize == Credentials("0", "1") }
-                ).then(upload())
-        ))
+                        { creds: Credentials -> creds == Credentials("0", "1") })
+                        .then(ServerFilters.CatchLensFailure())
+                        .then(pypiUpload())
+            )
+        )
     }
 
     fun loadConfig(fileName: String): Config {
@@ -56,20 +57,12 @@ class App : KoinComponent {
     }
 }
 
-class Upload() {
-    private val files = MultipartFormFile.multi.required("file")
-    private val form = Body.multipartForm(Validator.Strict, files).toLens()
-
-    operator fun invoke(): HttpHandler = { request ->
-        Response(Status.OK).body("Uploaded!\n")
-    }
-}
-
 fun main(args: Array<String>) {
-    startKoin { modules(modules) }
+    val koinApp = startKoin { modules(modules) }.koin
     val app = App()
     val fileName: String
     fileName = if (args.isEmpty()) "example-config.yaml" else args[0]
     app.config = app.loadConfig(fileName)
+    koinApp.declare(app.config)
     app.startServer().block()
 }

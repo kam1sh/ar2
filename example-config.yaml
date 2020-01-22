@@ -1,8 +1,11 @@
 listen:
-  host: localhost
+  host: localhost # not implemented
   port: 8080
 
 storage:
   path: /tmp/packages
   maxFileSize: 4G
+
+security:
+  secret: anchor2
 
