@@ -28,16 +28,16 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
-    compile group: "org.http4k", name: "http4k-core", version: "$http4k_version"
-    compile group: "org.http4k", name: "http4k-multipart", version: "$http4k_version"
-    compile group: "org.http4k", name: "http4k-server-undertow", version: "$http4k_version"
+    implementation group: "org.http4k", name: "http4k-core", version: "$http4k_version"
+    implementation group: "org.http4k", name: "http4k-multipart", version: "$http4k_version"
+    implementation group: "org.http4k", name: "http4k-server-undertow", version: "$http4k_version"
 
 
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml
-    compile group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "$jackson_version"
+    implementation group: 'com.fasterxml.jackson.dataformat', name: 'jackson-dataformat-yaml', version: "$jackson_version"
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind
-    compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "$jackson_version"
-    compile group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "$jackson_version"
+    implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: "$jackson_version"
+    implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "$jackson_version"
 
     implementation "org.koin:koin-core:$koin_version"
 }
