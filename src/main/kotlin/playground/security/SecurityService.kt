@@ -1,8 +1,7 @@
 package playground.security
 
-import org.http4k.core.Request
+import org.http4k.core.Filter
 
 interface SecurityService {
-    fun isAuthorized(request: Request): Boolean
-    fun hasAccessToProject(userId: Int, project: String): Boolean
+    fun basicAuth(): Filter
 }
