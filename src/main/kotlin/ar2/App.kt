@@ -1,5 +1,7 @@
-package playground
+package ar2
 
+import ar2.cli.CreateAdmin
+import ar2.cli.Serve
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -17,16 +19,25 @@ import org.http4k.server.asServer
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.get
-import org.koin.core.inject
 import org.koin.dsl.module
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import playground.pypi.PyPIViews
-import playground.security.SecurityService
-import playground.security.SecurityServiceImpl
+import ar2.views.PyPIViews
+import ar2.security.SecurityService
+import ar2.security.SecurityServiceImpl
+import com.github.ajalt.clikt.core.CliktCommand
+import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.options.default
+import com.github.ajalt.clikt.parameters.options.option
+import com.github.ajalt.clikt.parameters.options.required
+import com.github.ajalt.clikt.parameters.types.file
+import java.io.File
 import java.lang.Exception
+import java.lang.IllegalArgumentException
 import java.nio.file.FileSystems
 import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 
 
 val modules = module {
@@ -59,6 +70,7 @@ class App : KoinComponent {
 
         return ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming).then(
                 catchErrors().then(routes(
+//                        "/users"
                         "/py/{group}/{repo}/upload" bind POST to securityService.basicAuth()
                                 .then(ServerFilters.CatchLensFailure())
                                 .then(pypiViews.upload())
@@ -67,9 +79,12 @@ class App : KoinComponent {
         )
     }
 
-    fun loadConfig(fileName: String): Config {
+    fun loadConfig(file: File?) {
         val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule())
-        return Files.newBufferedReader(FileSystems.getDefault().getPath(fileName)).use { mapper.readValue(it, Config::class.java) }
+        config = (file ?: Paths.get("config.yaml").toFile())
+                .bufferedReader()
+                .use { mapper.readValue(it, Config::class.java) }
+        getKoin().declare(config)
     }
 
     fun startServer(): Http4kServer {
@@ -78,17 +93,21 @@ class App : KoinComponent {
         return server.start()
     }
 }
+class CliApp(val app: App): CliktCommand() {
+    val config: File? by option(help = "Path to configuration file").file(exists = true, fileOkay = true)
+    override fun run() {
+        app.loadConfig(config)
+    }
+}
 
 fun main(args: Array<String>) {
     val lc = LoggerFactory.getILoggerFactory() as LoggerContext
     lc.getLogger(Logger.ROOT_LOGGER_NAME).level = Level.WARN
-    lc.getLogger("playground").level = Level.INFO
+    lc.getLogger("ar2").level = Level.INFO
 
     val koinApp = startKoin { modules(modules) }.koin
     val app = App()
-    val fileName: String
-    fileName = if (args.isEmpty()) "example-config.yaml" else args[0]
-    app.config = app.loadConfig(fileName)
-    koinApp.declare(app.config)
-    app.startServer().block()
+    CliApp(app)
+            .subcommands(Serve(app), CreateAdmin(app))
+            .main(args)
 }

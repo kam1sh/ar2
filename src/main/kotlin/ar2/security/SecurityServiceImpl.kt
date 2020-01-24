@@ -1,4 +1,4 @@
-package playground.security
+package ar2.security
 
 import at.favre.lib.crypto.bcrypt.BCrypt
 import org.http4k.core.Credentials
@@ -7,7 +7,7 @@ import org.http4k.filter.ServerFilters
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-import playground.Config
+import ar2.Config
 import java.util.*
 
 class SecurityServiceImpl: SecurityService, KoinComponent {
