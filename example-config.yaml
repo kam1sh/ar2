@@ -9,3 +9,10 @@ storage:
 security:
   secret: anchor2
 
+postgres:
+  host: 127.0.0.1
+  port: 5432
+  db: ar2
+  username: ar2
+  password: ar2
+

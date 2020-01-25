@@ -8,3 +8,4 @@ CREATE TABLE IF NOT EXISTS users (
     created_on TIMESTAMP NOT NULL,
     last_login TIMESTAMP
 );
+CREATE INDEX idx_users_username ON users(username);

@@ -30,16 +30,14 @@ import ar2.users.UsersServiceImpl
 import ar2.web.ExceptionHandler
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
+import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
-import com.impossibl.postgres.jdbc.PGDataSource
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
-import org.postgresql.ds.PGSimpleDataSource
 import java.io.File
-import java.lang.Exception
 import java.nio.file.Paths
 import java.util.*
 import javax.sql.DataSource
@@ -75,7 +73,9 @@ class App : KoinComponent {
 
     fun loadConfig(file: File?) {
         val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule())
-        config = (file ?: Paths.get("config.yaml").toFile())
+        val configFile = file ?: Paths.get("ar2.yaml").toFile()
+        log.info("Using configuration file {}", configFile)
+        config = configFile
                 .bufferedReader()
                 .use { mapper.readValue(it, Config::class.java) }
         getKoin().declare(config)
@@ -97,8 +97,8 @@ class App : KoinComponent {
                 .dataSource(dataSource)
                 .locations("classpath:flyway")
                 .load()
-        migrator.migrate()
-        log.info("Migrations applied.")
+        val count = migrator.migrate()
+        log.info("{} migrations applied.", count)
         getKoin().declare(dataSource)
         val db = Database.connect(dataSource)
         getKoin().declare(db)
@@ -111,7 +111,7 @@ class App : KoinComponent {
     }
 }
 class CliApp(val app: App): CliktCommand() {
-    val config: File? by option(help = "Path to configuration file").file(exists = true, fileOkay = true)
+    val config: File? by option(help = "Path to configuration file", envvar = "AR2_CONFIG").file(exists = true, fileOkay = true)
     override fun run() {
         app.loadConfig(config)
         app.connectToDatabase()

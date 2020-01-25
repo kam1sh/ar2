@@ -10,6 +10,9 @@ import org.slf4j.LoggerFactory
 import ar2.Config
 import ar2.users.User
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
+import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.*
 
 class SecurityServiceImpl: SecurityService, KoinComponent {
@@ -23,7 +26,7 @@ class SecurityServiceImpl: SecurityService, KoinComponent {
     val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
     val verifier = BCrypt.verifyer(BCRYPT_VERSION, LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
 
-    val currentUser = ThreadLocal<User>()
+    val currentUser = ThreadLocal<ResultRow>()
 
     override fun basicAuth() = ServerFilters.BasicAuth(
             "ar2 authentication", {authenticate(it)}
@@ -32,23 +35,11 @@ class SecurityServiceImpl: SecurityService, KoinComponent {
     override fun encode(password: String): String = bCrypt.hashToString(ITERATIONS, password.toCharArray())
 
     fun authenticate(creds: Credentials): Boolean {
-        val passwordHash = encode("1")
-        if (creds.user == "0") {
-            val result = verifier.verify(creds.password.toCharArray(), passwordHash)
-            return result.verified
+        val user = transaction {
+            User.select {User.username eq creds.user}.singleOrNull()
         }
-        return false
+        val result = user != null && verifier.verify(creds.password.toCharArray(), user[User.passwordHash].toCharArray()).verified
+        if (result) currentUser.set(user)
+        return result
     }
-
-    fun getCredentials(request: Request): Credentials? {
-        val auth = request.header("Authorization")
-                ?.trim()
-                ?.takeIf { it.startsWith("Basic") }
-                ?.substringAfter("Basic")
-                ?.trim()
-        return String(Base64.getDecoder().decode(auth)).split(":").let {
-            Credentials(it.getOrElse(0) { "" }, it.getOrElse(1) { "" })
-        }
-    }
-
 }

@@ -1,9 +1,7 @@
 package ar2.users
 
 import ar2.security.SecurityService
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.koin.core.KoinComponent
@@ -15,9 +13,11 @@ class UsersServiceImpl(val securityService: SecurityService): UsersService, Koin
 
     val db: Database by inject()
 
+    fun find(username: String): ResultRow? = User.select {User.username eq username}.singleOrNull()
+
     override fun newUser(username: String, email: String, password: String, name: String, admin: Boolean) {
         transaction {
-            if (User.select {User.username eq username}.singleOrNull() != null) {
+            if (find(username) != null) {
                 throw UsersService.UserExists(username)
             }
             User.insert {
@@ -27,6 +27,14 @@ class UsersServiceImpl(val securityService: SecurityService): UsersService, Koin
                 it[User.name] = name
                 it[User.isAdmin] = admin
                 it[User.createdOn] = DateTime.now()
+            }
+        }
+    }
+
+    override fun changePassword(username: String, password: String) {
+        transaction {
+            User.update({User.username eq username}) {
+                it[passwordHash] = securityService.encode(password)
             }
         }
     }
