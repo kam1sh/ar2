@@ -22,27 +22,33 @@ import org.koin.core.get
 import org.koin.dsl.module
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import ar2.views.PyPIViews
+import ar2.web.views.PyPIViews
 import ar2.security.SecurityService
 import ar2.security.SecurityServiceImpl
+import ar2.users.UsersService
+import ar2.users.UsersServiceImpl
+import ar2.web.ExceptionHandler
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
-import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
-import com.github.ajalt.clikt.parameters.options.required
 import com.github.ajalt.clikt.parameters.types.file
+import com.impossibl.postgres.jdbc.PGDataSource
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.sql.Database
+import org.postgresql.ds.PGSimpleDataSource
 import java.io.File
 import java.lang.Exception
-import java.lang.IllegalArgumentException
-import java.nio.file.FileSystems
-import java.nio.file.Files
-import java.nio.file.Path
 import java.nio.file.Paths
+import java.util.*
+import javax.sql.DataSource
 
 
 val modules = module {
     single { SecurityServiceImpl() as SecurityService }
     single { PyPIViews() }
+    single { UsersServiceImpl(get()) as UsersService }
 }
 
 class App : KoinComponent {
@@ -51,25 +57,14 @@ class App : KoinComponent {
 
     lateinit var config: Config
 
+    lateinit var dataSource: DataSource
+
     val pypiViews: PyPIViews = get()
 
     val securityService: SecurityService = get()
 
-    fun getHandler(): HttpHandler {
-
-        fun catchErrors() = Filter { next: HttpHandler ->
-            { req: Request ->
-                try {
-                    next(req)
-                } catch (exc: Exception) {
-                    log.error("Caught exception:", exc)
-                    Response(Status.INTERNAL_SERVER_ERROR)
-                }
-            }
-        }
-
-        return ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming).then(
-                catchErrors().then(routes(
+    fun getHandler(): HttpHandler =  ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming).then(
+                ExceptionHandler()().then(routes(
 //                        "/users"
                         "/py/{group}/{repo}/upload" bind POST to securityService.basicAuth()
                                 .then(ServerFilters.CatchLensFailure())
@@ -77,7 +72,6 @@ class App : KoinComponent {
                 )
             )
         )
-    }
 
     fun loadConfig(file: File?) {
         val mapper = ObjectMapper(YAMLFactory()).registerModule(KotlinModule())
@@ -85,6 +79,29 @@ class App : KoinComponent {
                 .bufferedReader()
                 .use { mapper.readValue(it, Config::class.java) }
         getKoin().declare(config)
+    }
+
+    fun connectToDatabase() {
+        val props = Properties()
+        props["dataSourceClassName"] = "org.postgresql.ds.PGSimpleDataSource"
+        props["dataSource.serverName"] = config.postgres.host
+        props["dataSource.portNumber"] = config.postgres.port
+        props["dataSource.databaseName"] = config.postgres.db
+        props["dataSource.user"] = config.postgres.username
+        props["dataSource.password"] = config.postgres.password
+        val hikariConfig = HikariConfig(props)
+        dataSource = HikariDataSource(hikariConfig)
+        log.info("Succesfully connected to the database.")
+        val migrator = Flyway
+                .configure()
+                .dataSource(dataSource)
+                .locations("classpath:flyway")
+                .load()
+        migrator.migrate()
+        log.info("Migrations applied.")
+        getKoin().declare(dataSource)
+        val db = Database.connect(dataSource)
+        getKoin().declare(db)
     }
 
     fun startServer(): Http4kServer {
@@ -97,6 +114,7 @@ class CliApp(val app: App): CliktCommand() {
     val config: File? by option(help = "Path to configuration file").file(exists = true, fileOkay = true)
     override fun run() {
         app.loadConfig(config)
+        app.connectToDatabase()
     }
 }
 
@@ -105,7 +123,7 @@ fun main(args: Array<String>) {
     lc.getLogger(Logger.ROOT_LOGGER_NAME).level = Level.WARN
     lc.getLogger("ar2").level = Level.INFO
 
-    val koinApp = startKoin { modules(modules) }.koin
+    val koinApp = startKoin { modules(modules) }
     val app = App()
     CliApp(app)
             .subcommands(Serve(app), CreateAdmin(app))

@@ -1,4 +1,4 @@
-package ar2.views
+package ar2.web.views
 
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
@@ -22,31 +22,25 @@ class PyPIViews: KoinComponent {
     fun upload(): HttpHandler = { request ->
         val group = request.path("group")!!
         val repo = request.path("repo")!!
-        var resp: Response
-        try {
-            val classifiers = ArrayList<String>()
-            val requiresDist = ArrayList<String>()
-            val fields = HashMap<String, String>()
-            for (next in request.multipartIterator()) {
-                when (next) {
-                    is MultipartEntity.File -> uploadFile(next.file, group, repo)
-                    is MultipartEntity.Field -> {
-                        when (next.name) {
-                            "classifiers" -> classifiers.add(next.value)
-                            "requires_dist" -> requiresDist.add(next.value)
-                            else -> {
-                                fields[next.name] = next.value
-                                log.debug("{} = {}", next.name, next.value)
-                            }
+        val classifiers = ArrayList<String>()
+        val requiresDist = ArrayList<String>()
+        val fields = HashMap<String, String>()
+        for (next in request.multipartIterator()) {
+            when (next) {
+                is MultipartEntity.File -> uploadFile(next.file, group, repo)
+                is MultipartEntity.Field -> {
+                    when (next.name) {
+                        "classifiers" -> classifiers.add(next.value)
+                        "requires_dist" -> requiresDist.add(next.value)
+                        else -> {
+                            fields[next.name] = next.value
+                            log.debug("{} = {}", next.name, next.value)
                         }
                     }
                 }
             }
-            resp = Response(Status.CREATED).body("Uploaded!\n")
-        } catch (exist: PackageExists) {
-            resp = Response(Status.CONFLICT).body("This package is already uploaded")
         }
-        resp
+        Response(Status.CREATED).body("Uploaded!\n")
     }
 
     private fun uploadFile(file: MultipartFormFile, group: String, repo: String) {
