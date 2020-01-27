@@ -18,7 +18,7 @@ repositories {
 
 ext {
     koin_version = '2.0.1'
-    http4k_version = '3.218.0'
+    http4k_version = '3.227.0'
     jackson_version = '2.10.1'
 }
 
@@ -28,9 +28,15 @@ dependencies {
     // Use the Kotlin JDK 8 standard library.
     implementation 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
 
+    // Use the Kotlin test library.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    // Use the Kotlin JUnit integration.
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+
     implementation group: "org.http4k", name: "http4k-core", version: "$http4k_version"
     implementation group: "org.http4k", name: "http4k-multipart", version: "$http4k_version"
     implementation group: "org.http4k", name: "http4k-server-undertow", version: "$http4k_version"
+    implementation group: "org.http4k", name: "http4k-format-jackson", version: "$http4k_version"
 
     // jackson
     // https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml
@@ -40,6 +46,7 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: "$jackson_version"
 
     implementation "org.koin:koin-core:$koin_version"
+    testImplementation "org.koin:koin-test:$koin_version"
 
     // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
     implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.30'
@@ -57,8 +64,6 @@ dependencies {
     implementation 'org.postgresql:postgresql:42.2.9.jre7'
     // https://flywaydb.org/documentation/api/#download
     implementation group: 'org.flywaydb', name: 'flyway-core', version: '6.2.0'
-
-
 }
 
 

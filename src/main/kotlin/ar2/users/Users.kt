@@ -2,7 +2,7 @@ package ar2.users
 
 import org.jetbrains.exposed.sql.Table
 
-object User : Table("users") {
+object Users : Table("users") {
     val id = integer("id").autoIncrement()
     val username = varchar("username", 64)
     val passwordHash = varchar("password_hash", 128)

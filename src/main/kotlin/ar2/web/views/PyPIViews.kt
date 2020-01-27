@@ -7,17 +7,26 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
 import ar2.Config
-import java.io.IOException
+import ar2.security.SecurityService
+import ar2.web.WebError
+import ar2.web.WebResult
+import org.http4k.routing.bind
+import org.http4k.routing.routes
+import org.http4k.routing.RoutingHttpHandler
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 
-class PyPIViews: KoinComponent {
+class PyPIViews(val securityService: SecurityService): KoinComponent {
 
     val log = LoggerFactory.getLogger(PyPIViews::class.java)
 
     val cfg: Config by inject()
+
+    fun views(): RoutingHttpHandler = routes(
+            "/upload" bind Method.POST to securityService.basicAuth().then(upload())
+    )
 
     fun upload(): HttpHandler = { request ->
         val group = request.path("group")!!
@@ -44,14 +53,8 @@ class PyPIViews: KoinComponent {
     }
 
     private fun uploadFile(file: MultipartFormFile, group: String, repo: String) {
-        var path = Paths.get(cfg.storage.path)
-        for (item in setOf(group, repo)) {
-            path = path.resolve(item)
-            if (!Files.exists(path))
-                Files.createDirectory(path)
-            else if (!Files.isDirectory(path))
-                throw IOException("$path is not a directory")
-        }
+        var path = Paths.get(cfg.storage.path, group, repo)
+        Files.createDirectories(path)
         path = path.resolve(file.filename)
         if (path.toFile().exists())
             throw PackageExists()
@@ -60,4 +63,4 @@ class PyPIViews: KoinComponent {
 
 }
 
-class PackageExists: Exception()
+class PackageExists(): WebError(Status.CONFLICT, "Package already uploaded.")
