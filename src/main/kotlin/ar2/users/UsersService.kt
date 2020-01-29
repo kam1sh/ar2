@@ -12,7 +12,6 @@ enum class UserRole {
 class UserExists(val username: String): Exception()
 
 interface UsersService {
-    fun getCurrentUser(request: Request): User?
     fun findByUsername(username: String): User?
     fun findByUsernameRaw(username: String): ResultRow?
     fun newUser(username: String, email: String, password: String, name: String, admin: Boolean = false)

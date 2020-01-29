@@ -27,6 +27,7 @@ import ar2.security.SecurityServiceImpl
 import ar2.users.UsersService
 import ar2.users.UsersServiceImpl
 import ar2.web.ExceptionHandler
+import ar2.web.LookupSessionTokenFilter
 import ar2.web.context
 import ar2.web.views.UserViews
 import com.github.ajalt.clikt.core.CliktCommand
@@ -52,7 +53,7 @@ val modules = module {
 }
 
 class App : KoinComponent {
-    private val log = LoggerFactory.getLogger(App::class.java)
+    private val log = LoggerFactory.getLogger(javaClass)
 
     lateinit var config: Config
     lateinit var dataSource: DataSource
@@ -64,14 +65,14 @@ class App : KoinComponent {
 
     fun getWebHandler(): HttpHandler = ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming)
             .then(ServerFilters.InitialiseRequestContext(context))
-            .then(ExceptionHandler()
-                    .then(routes(
-                        "/login" bind userViews::authorize,
-                        "/users" bind POST to securityService.basicAuth().then(userViews.views()),
+            .then(ExceptionHandler())
+            .then(LookupSessionTokenFilter()())
+            .then(routes(
+                        "/login" bind POST to userViews::authenticate,
+                        "/users" bind securityService.requireSession().then(userViews.views()),
                         "/py/{group}/{repo}" bind pypiViews.views()
                 )
             )
-        )
 
     fun loadConfig(file: File) {
         log.info("Using configuration file {}", file.name)
@@ -128,9 +129,11 @@ class App : KoinComponent {
 class CliApp(val app: App): CliktCommand() {
     val config: File? by option(help = "Path to configuration file", envvar = "AR2_CONFIG").file(exists = true, fileOkay = true)
     val debug: Boolean by option(help = "Enable debug logging").flag()
+    val trace: Boolean by option(help = "Enable trace logging").flag()
 
     override fun run() {
-        val level = if (debug) Level.DEBUG else Level.INFO
+        var level = if (debug) Level.DEBUG else Level.WARN
+        level = if (trace) Level.TRACE else level
         app.setup(config ?: Paths.get("ar2.yaml").toFile(), logLevel = level)
     }
 }

@@ -20,7 +20,7 @@ import kotlin.collections.HashMap
 
 class PyPIViews(val securityService: SecurityService): KoinComponent {
 
-    val log = LoggerFactory.getLogger(PyPIViews::class.java)
+    val log = LoggerFactory.getLogger(javaClass)
 
     val cfg: Config by inject()
 

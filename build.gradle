@@ -20,6 +20,7 @@ ext {
     koin_version = '2.0.1'
     http4k_version = '3.227.0'
     jackson_version = '2.10.1'
+    targetJvm = '1.8'
 }
 
 dependencies {
@@ -66,6 +67,16 @@ dependencies {
     implementation group: 'org.flywaydb', name: 'flyway-core', version: '6.2.0'
 }
 
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "$targetJvm"
+    }
+}
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "$targetJvm"
+    }
+}
 
 apply plugin: 'com.github.johnrengelman.shadow'
 

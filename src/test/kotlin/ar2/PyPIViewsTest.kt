@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter
 import kotlin.test.assertEquals
 
 class PyPIViewsTest : BaseTest() {
+
     @Test
     fun testUpload() {
         var body = MultipartFormBody()
@@ -33,24 +34,11 @@ class PyPIViewsTest : BaseTest() {
         body = body.plus("file" to MultipartFormFile("example-0.1.0-py3-none-any.whl", ContentType.OCTET_STREAM, "content".byteInputStream()))
 
         val request = Request(Method.POST, "/py/test/test/upload")
-            .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
-            .body(body)
+                .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
+                .header("content-type", "multipart/form-data; boundary=${body.boundary}")
+                .body(body)
         val resp = app.getWebHandler()(request)
-        assertEquals(Status.INTERNAL_SERVER_ERROR, resp.status)
+        assertEquals(Status.CREATED, resp.status)
     }
 
-    @Test
-    fun testEmptyField() {
-        val handler: HttpHandler = {request ->
-            for (item in request.multipartIterator()) {
-                when (item) {
-                    is MultipartEntity.Field -> println("${item.name} = ${item.value}")
-                }
-            }
-            Response(Status.OK)
-        }
-        val request = Request(Method.POST, "/")
-                .body(MultipartFormBody().plus("test" to ""))
-        assertEquals(Status.OK, handler(request).status)
-    }
 }

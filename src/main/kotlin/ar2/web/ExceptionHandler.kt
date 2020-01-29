@@ -1,14 +1,16 @@
 package ar2.web
 
-import org.http4k.core.Filter
-import org.http4k.core.Request
-import org.http4k.core.Response
-import org.http4k.core.Status
+import org.http4k.core.*
+import org.http4k.lens.LensFailure
+import org.http4k.format.Jackson.auto
 import org.slf4j.LoggerFactory
 import java.lang.Exception
 
 object ExceptionHandler {
-    private val log = LoggerFactory.getLogger(ExceptionHandler::class.java)
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    data class BadRequestBody(val message: String)
+    val BRLens = Body.auto<BadRequestBody>().toLens()
 
     operator fun invoke() = Filter { next ->
         { req: Request ->
@@ -16,6 +18,9 @@ object ExceptionHandler {
                 next(req)
             } catch (responseExc: WebResult) {
                 responseExc.toResponse()
+            } catch (exc: LensFailure) {
+                log.debug("Error parsing request body: '{}'", exc.message)
+                BRLens(BadRequestBody("Invalid body provided"), Response(Status.BAD_REQUEST))
             } catch (exc: Exception) {
                 log.error("Caught exception:", exc)
                 Response(Status.INTERNAL_SERVER_ERROR)

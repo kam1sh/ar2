@@ -7,10 +7,10 @@ import org.slf4j.LoggerFactory
 import java.io.File
 
 
-data class ListenSettings(val host: String, val port: Int)
-data class StorageSettings(val path: String, val maxFileSize: String)
-data class SecuritySettings(val secret: String)
-data class PostgresSettings(val host: String, val port: Int, val db: String, val username: String, val password: String)
+data class ListenSettings(var host: String, var port: Int)
+data class StorageSettings(var path: String, var maxFileSize: String)
+data class SecuritySettings(var secret: String)
+data class PostgresSettings(var host: String, var port: Int, var db: String, var username: String, var password: String)
 
 data class Config (
         val listen: ListenSettings,
