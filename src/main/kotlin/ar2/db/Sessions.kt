@@ -20,17 +20,17 @@ object Sessions : Table("users_sessions") {
         }
     }
 
-    fun findUser(cookieValue: String) : User {
+    fun findUser(cookieValue: String): User {
         return transaction {
             (Users leftJoin Sessions)
                     .slice(Users.id, Users.username, Users.email, Users.name, Users.lastLogin, Users.createdOn, Users.isAdmin)
-                    .select {Sessions.key eq cookieValue}.single().toUser()
+                    .select { Sessions.key eq cookieValue }.single().toUser()
         }
     }
 
     fun pruneOld() {
         transaction {
-            Sessions.deleteWhere { expires lessEq DateTime.now()}
+            Sessions.deleteWhere { expires lessEq DateTime.now() }
         }
     }
 }

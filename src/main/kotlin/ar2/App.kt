@@ -2,34 +2,14 @@ package ar2
 
 import ar2.cli.CreateAdmin
 import ar2.cli.Serve
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.LoggerContext
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.module.kotlin.KotlinModule
-import org.http4k.core.*
-import org.http4k.core.Method.POST
-import org.http4k.filter.GzipCompressionMode
-import org.http4k.filter.ServerFilters
-import org.http4k.routing.bind
-import org.http4k.routing.routes
-import org.http4k.server.Http4kServer
-import org.http4k.server.Undertow
-import org.http4k.server.asServer
-import org.koin.core.KoinComponent
-import org.koin.core.context.startKoin
-import org.koin.core.get
-import org.koin.dsl.module
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import ar2.web.views.PyPIViews
 import ar2.security.SecurityService
 import ar2.security.SecurityServiceImpl
 import ar2.users.UsersService
 import ar2.users.UsersServiceImpl
-import ar2.web.ExceptionHandler
-import ar2.web.LookupSessionTokenFilter
-import ar2.web.context
+import ar2.web.views.PyPIViews
 import ar2.web.views.UserViews
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.LoggerContext
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.subcommands
 import com.github.ajalt.clikt.parameters.options.flag
@@ -37,12 +17,18 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.file
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.sql.Database
 import java.io.File
 import java.nio.file.Paths
 import java.util.*
 import javax.sql.DataSource
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.sql.Database
+import org.koin.core.KoinComponent
+import org.koin.core.context.startKoin
+import org.koin.core.get
+import org.koin.dsl.module
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 val modules = module {
     single { SecurityServiceImpl() as SecurityService }
@@ -57,22 +43,6 @@ class App : KoinComponent {
 
     lateinit var config: Config
     lateinit var dataSource: DataSource
-
-    private val pypiViews: PyPIViews = get()
-    private val userViews: UserViews = get()
-
-    private val securityService: SecurityService = get()
-
-    fun getWebHandler(): HttpHandler = ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming)
-            .then(ServerFilters.InitialiseRequestContext(context))
-            .then(ExceptionHandler())
-            .then(LookupSessionTokenFilter()())
-            .then(routes(
-                        "/login" bind POST to userViews::authenticate,
-                        "/users" bind securityService.requireSession().then(userViews.views()),
-                        "/py/{group}/{repo}" bind pypiViews.views()
-                )
-            )
 
     fun loadConfig(file: File) {
         log.info("Using configuration file {}", file.name)
@@ -116,17 +86,15 @@ class App : KoinComponent {
         loadConfig(configFile)
         setupLogging(logLevel)
         connectToDatabase()
-        val ss = getKoin().get<SecurityService>() as SecurityServiceImpl
-        ss.postInit()
+        postSetup()
     }
 
-    fun startServer(): Http4kServer {
-        val server = getWebHandler().asServer(Undertow(config.listen.port));
-        log.info("Launching server at port {}.", config.listen.port)
-        return server.start()
+    fun postSetup() {
+        val ss = get<SecurityService>() as SecurityServiceImpl
+        ss.postInit()
     }
 }
-class CliApp(val app: App): CliktCommand() {
+class CliApp(val app: App) : CliktCommand() {
     val config: File? by option(help = "Path to configuration file", envvar = "AR2_CONFIG").file(exists = true, fileOkay = true)
     val debug: Boolean by option(help = "Enable debug logging").flag()
     val trace: Boolean by option(help = "Enable trace logging").flag()

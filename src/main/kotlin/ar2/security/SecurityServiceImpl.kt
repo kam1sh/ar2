@@ -1,31 +1,30 @@
 package ar2.security
 
+import ar2.Config
+import ar2.db.Users
+import ar2.db.toUser
+import ar2.users.User
+import ar2.users.UsersService
+import ar2.web.currentUser
+import ar2.web.userKey
 import at.favre.lib.crypto.bcrypt.BCrypt
+import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
+import java.security.SecureRandom
+import org.http4k.core.*
 import org.http4k.core.Credentials
 import org.http4k.filter.ServerFilters
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-import ar2.Config
-import ar2.users.User
-import ar2.db.Users
-import ar2.db.toUser
-import ar2.users.UsersService
-import ar2.web.currentUser
-import ar2.web.userKey
-import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
-import org.http4k.core.*
-import java.security.SecureRandom
 
-val ITERATIONS = 6
-val BCRYPT_VERSION = BCrypt.Version.VERSION_2B
+const val ITERATIONS = 6
+val BCRYPT_VERSION: BCrypt.Version = BCrypt.Version.VERSION_2B
 
-class SecurityServiceImpl: SecurityService, KoinComponent {
+class SecurityServiceImpl : SecurityService, KoinComponent {
     val log = LoggerFactory.getLogger(SecurityServiceImpl::class.java)
 
     val config: Config by inject()
     val usersService: UsersService by inject()
-
 
     override lateinit var secureRandom: SecureRandom
 
@@ -40,8 +39,8 @@ class SecurityServiceImpl: SecurityService, KoinComponent {
             "ar2 authentication", key = userKey, lookup = ::authenticate
     )
 
-    override fun requireSession() = Filter {next ->
-        {request ->
+    override fun requireSession() = Filter { next ->
+        { request ->
             val usr = request.currentUser
             log.trace("Current user: {}", usr)
             if (usr != null) {

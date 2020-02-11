@@ -2,7 +2,6 @@ package ar2.users
 
 import ar2.db.Users
 import ar2.security.SecurityService
-import org.http4k.core.Request
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent
@@ -32,4 +31,3 @@ class UsersServiceImpl(val securityService: SecurityService) : UsersService, Koi
         }
     }
 }
-

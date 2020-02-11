@@ -8,12 +8,12 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.options.prompt
 import com.github.ajalt.clikt.parameters.options.required
+import java.lang.Exception
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.slf4j.LoggerFactory
-import java.lang.Exception
 
-class CreateAdmin(val app: App): CliktCommand(), KoinComponent {
+class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
     val log = LoggerFactory.getLogger(CreateAdmin::class.java)
 
     val email: String by option(help = "Email for the admin").required()
@@ -24,7 +24,7 @@ class CreateAdmin(val app: App): CliktCommand(), KoinComponent {
 
     override fun run() {
         try {
-            usersService.newUser(username, email, password,"Admin", admin = true)
+            usersService.newUser(username, email, password, "Admin", admin = true)
         } catch (exist: UserExists) {
             usersService.changePassword(username, password)
             log.warn("User {} already exists, changed password.", username)

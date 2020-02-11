@@ -1,24 +1,23 @@
 package ar2.web.views
 
-import org.http4k.core.*
-import org.http4k.lens.MultipartFormFile
-import org.http4k.routing.path
-import org.koin.core.KoinComponent
-import org.koin.core.inject
-import org.slf4j.LoggerFactory
 import ar2.Config
 import ar2.security.SecurityService
 import ar2.web.WebError
-import ar2.web.WebResult
-import org.http4k.routing.bind
-import org.http4k.routing.routes
-import org.http4k.routing.RoutingHttpHandler
 import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
+import org.http4k.core.*
+import org.http4k.lens.MultipartFormFile
+import org.http4k.routing.RoutingHttpHandler
+import org.http4k.routing.bind
+import org.http4k.routing.path
+import org.http4k.routing.routes
+import org.koin.core.KoinComponent
+import org.koin.core.inject
+import org.slf4j.LoggerFactory
 
-class PyPIViews(val securityService: SecurityService): KoinComponent {
+class PyPIViews(val securityService: SecurityService) : KoinComponent {
 
     val log = LoggerFactory.getLogger(javaClass)
 
@@ -60,7 +59,6 @@ class PyPIViews(val securityService: SecurityService): KoinComponent {
             throw PackageExists()
         Files.copy(file.content, path)
     }
-
 }
 
-class PackageExists(): WebError(Status.CONFLICT, "Package already uploaded.")
+class PackageExists() : WebError(Status.CONFLICT, "Package already uploaded.")

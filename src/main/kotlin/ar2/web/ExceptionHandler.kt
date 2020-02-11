@@ -1,10 +1,10 @@
 package ar2.web
 
-import org.http4k.core.*
-import org.http4k.lens.LensFailure
-import org.http4k.format.Jackson.auto
-import org.slf4j.LoggerFactory
 import java.lang.Exception
+import org.http4k.core.*
+import org.http4k.format.Jackson.auto
+import org.http4k.lens.LensFailure
+import org.slf4j.LoggerFactory
 
 object ExceptionHandler {
     private val log = LoggerFactory.getLogger(javaClass)

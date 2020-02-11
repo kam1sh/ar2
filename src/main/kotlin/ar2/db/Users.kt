@@ -9,7 +9,7 @@ object Users : Table("users") {
     val id = integer("id").autoIncrement()
     val username = varchar("username", 64)
     val passwordHash = varchar("password_hash", 128)
-    val email = varchar("email",256)
+    val email = varchar("email", 256)
     val name = varchar("name", 256)
     val isAdmin = bool("is_admin")
     val createdOn = datetime("created_on")
@@ -28,8 +28,8 @@ object Users : Table("users") {
         }
     }
 
-    fun findByUsername(username: String): User = transaction {
-        select {Users.username eq username}.single().toUser()
+    fun findByUsername(username: String): User? = transaction {
+        select { Users.username eq username }.singleOrNull()?.toUser()
     }
 }
 

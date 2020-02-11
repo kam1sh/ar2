@@ -1,12 +1,12 @@
 package ar2
 
+import ar2.web.getWebHandler
+import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
 import org.junit.Test
-import java.io.OutputStreamWriter
-import kotlin.test.assertEquals
 
-class PyPIViewsTest : BaseTest() {
+class PyPIViewsTest : EndToEndTest() {
 
     @Test
     fun testUpload() {
@@ -37,8 +37,7 @@ class PyPIViewsTest : BaseTest() {
                 .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
                 .header("content-type", "multipart/form-data; boundary=${body.boundary}")
                 .body(body)
-        val resp = app.getWebHandler()(request)
+        val resp = handler(request)
         assertEquals(Status.CREATED, resp.status)
     }
-
 }
