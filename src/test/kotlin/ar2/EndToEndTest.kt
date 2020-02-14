@@ -1,14 +1,13 @@
 package ar2
 
-import ar2.cli.Serve
 import ar2.db.Users
 import ar2.users.UsersService
 import ar2.web.WebHandler
 import ch.qos.logback.classic.Level
-import org.http4k.core.HttpHandler
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
+import org.http4k.core.HttpHandler
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.junit.After

@@ -31,6 +31,10 @@ object Users : Table("users") {
     fun findByUsername(username: String): User? = transaction {
         select { Users.username eq username }.singleOrNull()?.toUser()
     }
+
+    fun findAll(offset: Int, limit: Int): List<User> = transaction {
+        selectAll().limit(limit, offset = offset).map { x -> x.toUser() }
+    }
 }
 
 fun ResultRow.toUser() = User(

@@ -29,7 +29,6 @@ class WebHandler(context: KoinComponent) {
                     "/users" bind securityService.requireSession().then(userViews.views()),
                     "/py/{group}/{repo}" bind pyPIViews.views()
             ))
-
 }
 
 fun App.getWebHandler() = WebHandler(this).toHttpHandler()

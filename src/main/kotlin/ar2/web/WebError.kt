@@ -15,4 +15,4 @@ open class WebError(val status: Status, val msg: String) : WebResult() {
     }
 }
 
-class BadRequest(override val message: String) : WebError(Status.BAD_REQUEST, message) {}
+class BadRequest(override val message: String) : WebError(Status.BAD_REQUEST, message)

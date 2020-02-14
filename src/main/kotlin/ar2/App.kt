@@ -1,6 +1,7 @@
 package ar2
 
 import ar2.cli.CreateAdmin
+import ar2.cli.Maintenance
 import ar2.cli.Serve
 import ar2.security.SecurityService
 import ar2.security.SecurityServiceImpl
@@ -111,6 +112,6 @@ fun main(args: Array<String>) {
     startKoin { modules(modules) }
     val app = App()
     CliApp(app)
-            .subcommands(Serve(app), CreateAdmin(app))
+            .subcommands(Serve(app), CreateAdmin(app), Maintenance(app))
             .main(args)
 }

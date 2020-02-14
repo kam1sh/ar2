@@ -1,6 +1,5 @@
 package ar2
 
-import ar2.web.getWebHandler
 import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
