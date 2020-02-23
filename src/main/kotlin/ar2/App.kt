@@ -87,12 +87,6 @@ class App : KoinComponent {
         loadConfig(configFile)
         setupLogging(logLevel)
         connectToDatabase()
-        postSetup()
-    }
-
-    fun postSetup() {
-        val ss = get<SecurityService>() as SecurityServiceImpl
-        ss.postInit()
     }
 }
 class CliApp(val app: App) : CliktCommand() {

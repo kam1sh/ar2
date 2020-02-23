@@ -1,4 +1,4 @@
-from lib.session import Session, APIError
+from lib.session import Session, Credentials, APIError
 
 
 def test_headers():
@@ -8,7 +8,7 @@ def test_headers():
     assert resp.status_code == 406
 
 
-def test_login(admin_session):
+def test_login(admin_session: Session):
     try:
         admin_session.login({})
         assert False, "Invalid login form did not raised exception"
@@ -18,17 +18,17 @@ def test_login(admin_session):
     assert resp
 
 
-def test_user_list(admin_session):
-    resp = admin_session.request2("GET", "/users")
-    assert resp.ok
-    assert resp.json()
+def test_user_list(admin_session: Session):
+    assert admin_session.users.list()
 
 
-def test_create_delete_user(admin_session):
+def test_create_delete_user(admin_session: Session):
     admin_session.request2("POST", "/users", json={
         "user": dict(username="test", email="test@localhost", name="", admin=False),
         "password": "123"
     })
     user = admin_session.users.by_username("test")
+    print(user)
+    assert Session(Credentials("test", "123"))
     assert user
     assert user.delete()

@@ -3,23 +3,20 @@ package ar2.web.views
 import ar2.Config
 import ar2.db.Sessions
 import ar2.db.Users
-import ar2.db.toUser
 import ar2.security.SecurityService
 import ar2.users.BaseUser
 import ar2.users.User
 import ar2.users.UsersService
-import ar2.web.BadRequest
-import ar2.web.WebError
-import ar2.web.currentUser
+import ar2.web.*
 import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import org.http4k.base64Encode
 import org.http4k.core.*
 import org.http4k.core.cookie.Cookie
 import org.http4k.core.cookie.cookie
 import org.http4k.format.Jackson.auto
-import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
@@ -41,17 +38,15 @@ class UserViews(
 
     val cfg: Config by inject()
 
-    fun views(): RoutingHttpHandler {
-        return routes(
-                "/" bind Method.GET to ::listUsers,
-                "/" bind Method.POST to ::newUser,
-                "/_current" bind Method.GET to ::currentUser,
-                "/{id}" bind Method.DELETE to ::deleteUser
+    fun views() = routes(
+            "/" bind Method.GET to ::listUsers,
+            "/" bind Method.POST to ::newUser,
+            "/_current" bind Method.GET to ::currentUser,
+            "/{id}" bind Method.DELETE to ::deleteUser
         )
-    }
 
     data class AuthRequest(val username: String, val password: String)
-    data class AuthResponse(val success: Boolean, val message: String)
+    data class AuthResponse(val message: String)
     val authLens = Body.auto<AuthRequest>().toLens()
     val authResponseLens = Body.auto<AuthResponse>().toLens()
 
@@ -63,13 +58,13 @@ class UserViews(
             throw BadRequest("Invalid username or password.")
         val user = usersService.findByUsername(form.username)!!
         val byteArr = ByteArray(10)
-        securityService.secureRandom.nextBytes(byteArr)
+        ThreadLocalRandom.current().nextBytes(byteArr)
         val cookieValue = String(byteArr).base64Encode()
         val expires = DateTime.now().plusDays(cfg.security.sessionLifetimeDays)
         Sessions.new(cookieValue, user = user, expires = expires)
         val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(expires.millis), TimeZone.getDefault().toZoneId())
         val cookie = Cookie("AR2SESSION", cookieValue, expires = dt)
-        return authResponseLens(AuthResponse(true, "Successfully authenticated as $user."), Response(Status.OK).cookie(cookie))
+        return authResponseLens(AuthResponse("Successfully authenticated as $user."), Response(Status.OK).cookie(cookie))
     }
 
     data class NewUserRequest(val user: BaseUser, val password: String)
@@ -82,18 +77,15 @@ class UserViews(
         if (form.user.admin && !request.currentUser!!.admin) {
             throw BadRequest("You don't have permission to create administrators.")
         }
-        try {
+        val user = try {
             Users.new(
-                    form.user.username,
-                    passwordHash = securityService.encode(form.password),
-                    name = form.user.name,
-                    email = form.user.email,
-                    admin = form.user.admin
+                    form.user,
+                    passwordHash = securityService.encode(form.password)
             )
         } catch (e: ExposedSQLException) {
             return Response(Status.CONFLICT).body("This user already exists.")
         }
-        return Response(Status.CREATED)
+        return Response(Status.CREATED).header("Location", "/users/${user.id}")
     }
 
     val userResponseLens = Body.auto<User>().toLens()
@@ -111,7 +103,7 @@ class UserViews(
     }
 
     private fun deleteUser(request: Request): Response {
-        if(!request.currentUser!!.admin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
+        if (!request.currentUser!!.admin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
         val id = request.path("id")!!.toInt()
         transaction {
             Users.select { Users.id eq id }.singleOrNull() ?: throw BadRequest("User with ID $id does not exist.")
@@ -119,19 +111,4 @@ class UserViews(
         }
         return Response(Status.NO_CONTENT)
     }
-}
-
-fun Request.checkApiAcceptHeader() {
-    val header = header("Accept") ?: ""
-    log.trace("'Accept' header value: {}", header)
-    if (!(header.contains("application/json") || header.contains("*/*"))) {
-        throw WebError(Status.NOT_ACCEPTABLE, "Client does not accepts application/json, can't process request.")
-    }
-}
-
-fun Request.checkApiCTHeader() {
-    val header = header("Content-Type") ?: ""
-    log.trace("'Content-Type' header value: {}", header)
-    if (!header.contains("application/json; charset=UTF-8"))
-        throw WebError(Status.NOT_ACCEPTABLE, "Client body is not application/json with UTF-8 charset, can't process request")
 }

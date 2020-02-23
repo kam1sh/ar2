@@ -7,7 +7,7 @@ import org.joda.time.DateTime
 
 object Sessions : Table("users_sessions") {
     val key = varchar("session_key", 40)
-    val userId = integer("user_id") references Users.id
+    val userId = integer("user_id").references(Users.id)
     val expires = datetime("expires")
 
     fun new(encodedCookie: String, user: User, expires: DateTime) {

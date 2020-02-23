@@ -1,6 +1,7 @@
 package ar2.cli
 
 import ar2.App
+import ar2.users.BaseUser
 import ar2.users.UserExists
 import ar2.users.UsersService
 import com.github.ajalt.clikt.core.CliktCommand
@@ -24,7 +25,7 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
 
     override fun run() {
         try {
-            usersService.newUser(username, email, password, "Admin", admin = true)
+            usersService.newUser(BaseUser(username, email, "Admin", admin = true), password)
         } catch (exist: UserExists) {
             usersService.changePassword(username, password)
             log.warn("User {} already exists, changed password.", username)

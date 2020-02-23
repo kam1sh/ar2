@@ -1,6 +1,6 @@
 package ar2.security
 
-import ar2.Config
+import ar2.db.Groups
 import ar2.db.Users
 import ar2.db.toUser
 import ar2.users.User
@@ -9,10 +9,11 @@ import ar2.web.currentUser
 import ar2.web.userKey
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
-import java.security.SecureRandom
 import org.http4k.core.*
 import org.http4k.core.Credentials
 import org.http4k.filter.ServerFilters
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
@@ -20,17 +21,10 @@ import org.slf4j.LoggerFactory
 const val ITERATIONS = 6
 val BCRYPT_VERSION: BCrypt.Version = BCrypt.Version.VERSION_2B
 
-class SecurityServiceImpl : SecurityService, KoinComponent {
+class SecurityServiceImpl() : SecurityService, KoinComponent {
     val log = LoggerFactory.getLogger(SecurityServiceImpl::class.java)
 
-    val config: Config by inject()
     val usersService: UsersService by inject()
-
-    override lateinit var secureRandom: SecureRandom
-
-    fun postInit() {
-        secureRandom = SecureRandom(config.security.secret.toByteArray())
-    }
 
     val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
     val verifier = BCrypt.verifyer(BCRYPT_VERSION, LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
@@ -60,5 +54,10 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
             return rawUser?.toUser()
         }
         return null
+    }
+
+    override fun giveGroupRole(user: User, group: String, role: Role) {
+        val groupId = Groups.findIdByName(group)
+        //
     }
 }

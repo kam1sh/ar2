@@ -23,22 +23,31 @@ class PyPIViews(val securityService: SecurityService) : KoinComponent {
 
     val cfg: Config by inject()
 
-    fun views(): RoutingHttpHandler = routes(
-            "/upload" bind Method.POST to securityService.basicAuth().then(upload())
+    fun views() = routes(
+            "/upload" bind Method.POST to securityService.basicAuth().then(::upload)
     )
 
-    fun upload(): HttpHandler = { request ->
-        val group = request.path("group")!!
-        val repo = request.path("repo")!!
+    fun upload(request: Request): Response {
+        val groupName = request.path("group")!!
+        val repoName = request.path("repo")!!
+        // todo check access
+
+        var fileName: String? = null
         val classifiers = ArrayList<String>()
         val requiresDist = ArrayList<String>()
         val fields = HashMap<String, String>()
+
         for (next in request.multipartIterator()) {
             when (next) {
-                is MultipartEntity.File -> uploadFile(next.file, group, repo)
+                is MultipartEntity.File -> {
+                    fileName = next.file.filename
+                    uploadFile(next.file, groupName, repoName)
+                }
                 is MultipartEntity.Field -> {
                     when (next.name) {
-                        "classifiers" -> classifiers.add(next.value)
+                        "classifiers" -> {
+                            classifiers.add(next.value)
+                        }
                         "requires_dist" -> requiresDist.add(next.value)
                         else -> {
                             fields[next.name] = next.value
@@ -48,7 +57,9 @@ class PyPIViews(val securityService: SecurityService) : KoinComponent {
                 }
             }
         }
-        Response(Status.CREATED).body("Uploaded!\n")
+        log.debug("classifiers: {}", classifiers)
+        log.debug("requires_dist: {}", requiresDist)
+        return Response(Status.CREATED).body("Uploaded!\n")
     }
 
     private fun uploadFile(file: MultipartFormFile, group: String, repo: String) {
