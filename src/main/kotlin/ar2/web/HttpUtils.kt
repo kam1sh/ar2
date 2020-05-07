@@ -15,6 +15,6 @@ fun Request.checkApiAcceptHeader() {
 fun Request.checkApiCTHeader() {
     val header = header("Content-Type") ?: ""
     log.trace("'Content-Type' header value: {}", header)
-    if (!header.contains("application/json; charset=UTF-8"))
+    if (!header.toLowerCase().contains("application/json; charset=utf-8"))
         throw WebError(Status.NOT_ACCEPTABLE, "Client body is not application/json with UTF-8 charset, can't process request")
 }

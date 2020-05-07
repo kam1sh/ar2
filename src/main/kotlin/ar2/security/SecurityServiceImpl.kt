@@ -1,6 +1,5 @@
 package ar2.security
 
-import ar2.db.Groups
 import ar2.db.Users
 import ar2.db.toUser
 import ar2.users.User
@@ -12,8 +11,6 @@ import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
 import org.http4k.core.*
 import org.http4k.core.Credentials
 import org.http4k.filter.ServerFilters
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
@@ -57,7 +54,7 @@ class SecurityServiceImpl() : SecurityService, KoinComponent {
     }
 
     override fun giveGroupRole(user: User, group: String, role: Role) {
-        val groupId = Groups.findIdByName(group)
-        //
+//        val groupId = Groups.findIdByName(group)
+//         TODO
     }
 }

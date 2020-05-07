@@ -17,6 +17,7 @@ object ExceptionHandler {
             try {
                 next(req)
             } catch (responseExc: WebResult) {
+                log.trace("Returning WebResult, message - {}", responseExc.message())
                 responseExc.toResponse()
             } catch (exc: LensFailure) {
                 log.debug("Error parsing request body: '{}'", exc.message)

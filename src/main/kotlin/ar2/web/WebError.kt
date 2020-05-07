@@ -10,9 +10,10 @@ open class WebError(val status: Status, val msg: String) : WebResult() {
 
     override fun toResponse(): Response {
         val payload = Payload(msg, javaClass.canonicalName)
-        val response = payloadLens(payload, Response(status))
-        return response
+        return payloadLens(payload, Response(status))
     }
+
+    override fun message() = msg
 }
 
 class BadRequest(override val message: String) : WebError(Status.BAD_REQUEST, message)

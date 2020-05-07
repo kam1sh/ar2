@@ -9,7 +9,6 @@ import kotlin.collections.ArrayList
 import kotlin.collections.HashMap
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
-import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
@@ -32,7 +31,6 @@ class PyPIViews(val securityService: SecurityService) : KoinComponent {
         val repoName = request.path("repo")!!
         // todo check access
 
-        var fileName: String? = null
         val classifiers = ArrayList<String>()
         val requiresDist = ArrayList<String>()
         val fields = HashMap<String, String>()
@@ -40,7 +38,6 @@ class PyPIViews(val securityService: SecurityService) : KoinComponent {
         for (next in request.multipartIterator()) {
             when (next) {
                 is MultipartEntity.File -> {
-                    fileName = next.file.filename
                     uploadFile(next.file, groupName, repoName)
                 }
                 is MultipartEntity.Field -> {

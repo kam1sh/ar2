@@ -5,9 +5,9 @@ import ar2.db.Groups
 import ar2.web.checkApiAcceptHeader
 import ar2.web.checkApiCTHeader
 import org.http4k.core.*
+import org.http4k.format.Jackson.auto
 import org.http4k.routing.bind
 import org.http4k.routing.routes
-import org.http4k.format.Jackson.auto
 
 class RepositoryGroupViews {
 
@@ -22,7 +22,7 @@ class RepositoryGroupViews {
         request.checkApiAcceptHeader()
         val limit = request.query("limit") ?: "10"
         val offset = request.query("offset") ?: "0"
-        val groups =  Groups.findAll(limit = limit.toInt(), offset = offset.toInt())
+        val groups = Groups.findAll(limit = limit.toInt(), offset = offset.toInt())
         return listResponseLens(groups, Response(Status.OK))
     }
 

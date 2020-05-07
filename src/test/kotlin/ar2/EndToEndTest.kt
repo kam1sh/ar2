@@ -1,6 +1,7 @@
 package ar2
 
 import ar2.db.Users
+import ar2.users.BaseUser
 import ar2.users.UsersService
 import ar2.web.WebHandler
 import ch.qos.logback.classic.Level
@@ -30,12 +31,15 @@ open class EndToEndTest : KoinTest {
         startKoin { modules(modules) }
         app = App()
         app.setup(File("ar2.yaml"), logLevel = Level.TRACE)
+        val user = BaseUser(
+            "testadmin",
+            email = "admin@localhost",
+            name = "admin",
+            admin = true
+        )
         app.get<UsersService>().newUser(
-                "testadmin",
-                email = "admin@localhost",
-                password = "test",
-                name = "admin",
-                admin = true
+                request = user,
+                password = "test"
         )
         storagePath = Files.createTempDirectory("packages")
         app.config.storage.path = storagePath.toString()
