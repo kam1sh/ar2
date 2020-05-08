@@ -1,8 +1,10 @@
 package ar2
 
 import ar2.db.Users
+import ar2.lib.session.Credentials
+import ar2.lib.session.Session
+import ar2.services.UsersService
 import ar2.users.BaseUser
-import ar2.users.UsersService
 import ar2.web.WebHandler
 import ch.qos.logback.classic.Level
 import java.io.File
@@ -17,6 +19,8 @@ import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
 import org.koin.test.KoinTest
+import org.koin.test.get
+import org.koin.test.mock.declare
 import org.slf4j.LoggerFactory
 
 open class EndToEndTest : KoinTest {
@@ -44,6 +48,7 @@ open class EndToEndTest : KoinTest {
         storagePath = Files.createTempDirectory("packages")
         app.config.storage.path = storagePath.toString()
         handler = WebHandler(app).toHttpHandler()
+        getKoin().declare(handler)
     }
 
     @After
@@ -57,5 +62,11 @@ open class EndToEndTest : KoinTest {
             .sorted(Comparator.reverseOrder())
             .map(Path::toFile)
             .forEach { file -> file.delete() }
+    }
+
+    fun adminSession(): Session {
+        val sess = Session(Credentials("testadmin", "test"))
+        sess.login()
+        return sess
     }
 }

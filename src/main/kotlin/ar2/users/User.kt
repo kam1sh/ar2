@@ -1,16 +1,4 @@
 package ar2.users
 
-data class BaseUser(val username: String, val email: String, val name: String, val admin: Boolean)
-data class User(val id: Int, val obj: BaseUser) {
-    val username: String
-        get() = obj.username
-
-    val email: String
-        get() = obj.email
-
-    val name: String
-        get() = obj.name
-
-    val admin: Boolean
-        get() = obj.admin
-}
+open class BaseUser(var username: String, var email: String, var name: String, var admin: Boolean)
+class User(val id: Int, username: String, email: String, name: String, admin: Boolean) : BaseUser(username, email, name, admin)

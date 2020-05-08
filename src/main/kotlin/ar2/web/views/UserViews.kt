@@ -3,10 +3,11 @@ package ar2.web.views
 import ar2.Config
 import ar2.db.Sessions
 import ar2.db.Users
-import ar2.security.SecurityService
+import ar2.db.toUser
+import ar2.services.SecurityService
+import ar2.services.UsersService
 import ar2.users.BaseUser
 import ar2.users.User
-import ar2.users.UsersService
 import ar2.web.*
 import java.time.Instant
 import java.time.LocalDateTime
@@ -63,7 +64,7 @@ class UserViews(
         val expires = DateTime.now().plusDays(cfg.security.sessionLifetimeDays)
         Sessions.new(cookieValue, user = user, expires = expires)
         val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(expires.millis), TimeZone.getDefault().toZoneId())
-        val cookie = Cookie("AR2SESSION", cookieValue, expires = dt)
+        val cookie = Cookie(cfg.security.cookieName, cookieValue, expires = dt)
         return authResponseLens(AuthResponse("Successfully authenticated as $user."), Response(Status.OK).cookie(cookie))
     }
 
@@ -106,7 +107,8 @@ class UserViews(
         if (!request.currentUser!!.admin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
         val id = request.path("id")!!.toInt()
         transaction {
-            Users.select { Users.id eq id }.singleOrNull() ?: throw BadRequest("User with ID $id does not exist.")
+            val user = Users.select { Users.id eq id }.singleOrNull() ?: throw BadRequest("User with ID $id does not exist.")
+            if (request.currentUser!!.id == user.toUser().id) throw BadRequest("You cannot remove yourself =/")
             Users.deleteWhere { Users.id eq id }
         }
         return Response(Status.NO_CONTENT)

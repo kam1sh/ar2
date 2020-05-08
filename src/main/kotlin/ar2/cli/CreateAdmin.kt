@@ -1,9 +1,9 @@
 package ar2.cli
 
 import ar2.App
+import ar2.services.UserExists
+import ar2.services.UsersService
 import ar2.users.BaseUser
-import ar2.users.UserExists
-import ar2.users.UsersService
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option

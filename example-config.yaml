@@ -8,6 +8,7 @@ storage:
 
 security:
   sessionLifetimeDays: 2
+  cookieName: AR2SESSION
   secret: anchor2
 
 postgres:

@@ -42,10 +42,8 @@ object Users : IntIdTable("users") {
 
 fun ResultRow.toUser() = User(
         id = this[Users.id].value,
-        obj = BaseUser(
-            username = this[Users.username],
-            email = this[Users.email],
-            name = this[Users.name],
-            admin = this[Users.isAdmin]
-        )
+        username = this[Users.username],
+        email = this[Users.email],
+        name = this[Users.name],
+        admin = this[Users.isAdmin]
 )

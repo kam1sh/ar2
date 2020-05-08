@@ -1,7 +1,7 @@
 package ar2.web.views
 
 import ar2.Config
-import ar2.security.SecurityService
+import ar2.services.SecurityService
 import ar2.web.WebError
 import java.nio.file.Files
 import java.nio.file.Paths

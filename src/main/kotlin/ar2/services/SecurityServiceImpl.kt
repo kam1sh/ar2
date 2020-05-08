@@ -1,9 +1,9 @@
-package ar2.security
+package ar2.services
 
 import ar2.db.Users
 import ar2.db.toUser
+import ar2.users.Role
 import ar2.users.User
-import ar2.users.UsersService
 import ar2.web.currentUser
 import ar2.web.userKey
 import at.favre.lib.crypto.bcrypt.BCrypt
@@ -24,7 +24,10 @@ class SecurityServiceImpl() : SecurityService, KoinComponent {
     val usersService: UsersService by inject()
 
     val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
-    val verifier = BCrypt.verifyer(BCRYPT_VERSION, LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
+    val verifier = BCrypt.verifyer(
+        BCRYPT_VERSION, LongPasswordStrategies.hashSha512(
+            BCRYPT_VERSION
+        ))
 
     override fun basicAuth() = ServerFilters.BasicAuth(
             "ar2 authentication", key = userKey, lookup = ::authenticate

@@ -1,7 +1,7 @@
 package ar2.web
 
 import ar2.App
-import ar2.security.SecurityService
+import ar2.services.SecurityService
 import ar2.web.views.PyPIViews
 import ar2.web.views.UserViews
 import org.http4k.core.HttpHandler

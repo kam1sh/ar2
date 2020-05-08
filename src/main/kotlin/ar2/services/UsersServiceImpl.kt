@@ -1,7 +1,8 @@
-package ar2.users
+package ar2.services
 
 import ar2.db.Users
-import ar2.security.SecurityService
+import ar2.users.BaseUser
+import ar2.users.User
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent

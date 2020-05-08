@@ -3,10 +3,10 @@ package ar2
 import ar2.cli.CreateAdmin
 import ar2.cli.Maintenance
 import ar2.cli.Serve
-import ar2.security.SecurityService
-import ar2.security.SecurityServiceImpl
-import ar2.users.UsersService
-import ar2.users.UsersServiceImpl
+import ar2.services.SecurityService
+import ar2.services.SecurityServiceImpl
+import ar2.services.UsersService
+import ar2.services.UsersServiceImpl
 import ar2.web.views.PyPIViews
 import ar2.web.views.UserViews
 import ch.qos.logback.classic.Level
@@ -26,7 +26,6 @@ import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
-import org.koin.core.get
 import org.koin.dsl.module
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory

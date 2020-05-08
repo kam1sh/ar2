@@ -32,7 +32,6 @@ class RepositoryGroupViews {
     private fun newGroup(request: Request): Response {
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
-
         return Response(Status.CREATED)
     }
 }

@@ -1,4 +1,4 @@
-package ar2.security
+package ar2.users
 
 enum class Role(code: Int) {
     NONE(0),

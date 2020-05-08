@@ -1,5 +1,6 @@
-package ar2.security
+package ar2.services
 
+import ar2.users.Role
 import ar2.users.User
 import org.http4k.core.Credentials
 import org.http4k.core.Filter

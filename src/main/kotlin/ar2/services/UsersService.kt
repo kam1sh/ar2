@@ -1,5 +1,7 @@
-package ar2.users
+package ar2.services
 
+import ar2.users.BaseUser
+import ar2.users.User
 import java.lang.Exception
 import org.jetbrains.exposed.sql.ResultRow
 

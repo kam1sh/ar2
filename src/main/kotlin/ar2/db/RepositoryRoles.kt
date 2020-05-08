@@ -1,6 +1,6 @@
 package ar2.db
 
-import ar2.security.Role
+import ar2.users.Role
 import org.jetbrains.exposed.dao.IntIdTable
 
 object RepositoryRoles : IntIdTable("repository_roles") {
