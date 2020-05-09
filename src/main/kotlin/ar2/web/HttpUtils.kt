@@ -1,8 +1,10 @@
 package ar2.web
 
-import ar2.web.views.log
 import org.http4k.core.Request
 import org.http4k.core.Status
+import org.slf4j.LoggerFactory
+
+val log = LoggerFactory.getLogger("ar2.web.HttpUtils")
 
 fun Request.checkApiAcceptHeader() {
     val header = header("Accept") ?: ""

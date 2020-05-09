@@ -1,14 +1,19 @@
 package ar2.cli
 
 import ar2.App
-import ar2.db.Sessions
+import ar2.services.SessionsService
 import com.github.ajalt.clikt.core.CliktCommand
+import org.koin.core.KoinComponent
+import org.koin.core.inject
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
-class Maintenance(val app: App) : CliktCommand() {
+class Maintenance(val app: App) : CliktCommand(), KoinComponent {
     val log = LoggerFactory.getLogger(javaClass)
 
+    val sessionsService: SessionsService by inject()
+
     override fun run() {
-        Sessions.pruneOld()
+        sessionsService.pruneOld(LocalDateTime.now())
     }
 }

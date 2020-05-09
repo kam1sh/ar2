@@ -5,6 +5,7 @@ import ar2.web.views.UserViews
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.http4k.core.*
 import org.http4k.core.cookie.Cookie
@@ -16,7 +17,9 @@ import org.koin.core.inject
 
 data class Credentials(val username: String, val password: String)
 
-val mapper = ObjectMapper(JsonFactory()).registerModule(KotlinModule())
+val mapper = ObjectMapper(JsonFactory())
+    .registerModule(KotlinModule())
+    .registerModule(JavaTimeModule())
 
 class Session(val creds: Credentials? = null) : KoinComponent {
     val cfg: Config by inject()

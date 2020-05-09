@@ -1,11 +1,10 @@
 package ar2
 
+import ar2.db.User
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
 import ar2.lib.session.Session
 import ar2.lib.session.deserialize
-import ar2.users.BaseUser
-import ar2.users.User
 import ar2.web.views.UserViews
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -40,7 +39,7 @@ class UserViewsTest : EndToEndTest() {
     fun testCreateDeleteUser() {
         val sess = adminSession()
         var resp = sess.request(Method.POST, "/users", UserViews.NewUserRequest(
-            BaseUser("test", "test@test", "test user", false), "test123"
+            User(username = "test", email = "test@test", name = "testuser", isAdmin = false), "test123"
         ))
         assertEquals(Status.CREATED, resp.status)
         val user = sess.users().find("test")

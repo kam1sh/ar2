@@ -1,9 +1,7 @@
 package ar2.services
 
-import ar2.db.Users
-import ar2.db.toUser
+import ar2.db.User
 import ar2.users.Role
-import ar2.users.User
 import ar2.web.currentUser
 import ar2.web.userKey
 import at.favre.lib.crypto.bcrypt.BCrypt
@@ -48,12 +46,9 @@ class SecurityServiceImpl() : SecurityService, KoinComponent {
     override fun encode(password: String): String = bCrypt.hashToString(ITERATIONS, password.toCharArray())
 
     override fun authenticate(creds: Credentials): User? {
-        val rawUser = usersService.findByUsernameRaw(creds.user)
-        val result = rawUser != null && verifier.verify(creds.password.toCharArray(), rawUser[Users.passwordHash].toCharArray()).verified
-        if (result) {
-            return rawUser?.toUser()
-        }
-        return null
+        val user = usersService.findByUsername(creds.user)
+        val result = user != null && verifier.verify(creds.password.toCharArray(), user.passwordHash!!.toCharArray()).verified
+        return if (result) user else null
     }
 
     override fun giveGroupRole(user: User, group: String, role: Role) {

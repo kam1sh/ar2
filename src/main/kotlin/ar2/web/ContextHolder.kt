@@ -1,8 +1,8 @@
 package ar2.web
 
 import ar2.Config
-import ar2.db.Sessions
-import ar2.users.User
+import ar2.db.User
+import ar2.services.SessionsService
 import org.http4k.core.*
 import org.http4k.core.cookie.cookie
 import org.http4k.lens.RequestContextKey
@@ -17,13 +17,14 @@ class LookupSessionTokenFilter : KoinComponent {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private val cfg: Config by inject()
+    private val sessionsService: SessionsService by inject()
 
     operator fun invoke() = Filter { next -> { request -> doLookup(next, request) } }
 
     private fun doLookup(next: HttpHandler, request: Request): Response {
         val token = request.cookie(cfg.security.cookieName)
         token?.let {
-            val user = Sessions.findUser(token.value)
+            val user = sessionsService.findUser(token.value)
             request.currentUser = user
         }
         return next(request)

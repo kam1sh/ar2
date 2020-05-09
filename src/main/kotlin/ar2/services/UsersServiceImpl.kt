@@ -1,31 +1,49 @@
 package ar2.services
 
-import ar2.db.Users
-import ar2.users.BaseUser
-import ar2.users.User
+import ar2.db.User
+import org.hibernate.SessionFactory
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent
+import org.koin.core.inject
 import org.slf4j.LoggerFactory
+import java.time.LocalDateTime
 
 class UsersServiceImpl(val securityService: SecurityService) : UsersService, KoinComponent {
-    val log = LoggerFactory.getLogger(UsersServiceImpl::class.java)
+    private val log = LoggerFactory.getLogger(UsersServiceImpl::class.java)
 
-    override fun findByUsername(username: String): User? = Users.findByUsername(username)
-    override fun findByUsernameRaw(username: String): ResultRow? = transaction { Users.select { Users.username eq username }.singleOrNull() }
+    private val factory: SessionFactory by inject()
 
-    override fun newUser(request: BaseUser, password: String): User {
+    override fun findByUsername(username: String): User? {
+        factory.openSession().use {
+            val user = it.createQuery("from User where username = :username")
+                .setParameter("username", username)
+                .uniqueResult()
+            return user as User?
+        }
+    }
+
+    override fun newUser(request: User, password: String): User {
         if (findByUsername(request.username) != null) {
             throw UserExists(request.username)
         }
-        return Users.new(request, passwordHash = securityService.encode(password))
+        request.passwordHash = securityService.encode(password)
+        request.createdOn = LocalDateTime.now()
+        factory.openSession().use {
+            val tr = it.beginTransaction()
+            it.save(request)
+            tr.commit()
+        }
+        return request
     }
 
     override fun changePassword(username: String, password: String) {
-        transaction {
-            Users.update({ Users.username eq username }) {
-                it[passwordHash] = securityService.encode(password)
-            }
+        factory.openSession().use {
+            val user = findByUsername(username)
+            user?.passwordHash = securityService.encode(password)
+            val tr = it.beginTransaction()
+            it.update(user)
+            tr.commit()
         }
     }
 }
