@@ -4,12 +4,11 @@ import ar2.db.User
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
 import ar2.lib.session.Session
-import ar2.lib.session.deserialize
 import ar2.web.views.UserViews
+import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.testng.annotations.Test
-import kotlin.test.*
 
 class UserViewsTest : EndToEndTest() {
 

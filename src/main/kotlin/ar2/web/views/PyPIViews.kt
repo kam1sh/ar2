@@ -16,17 +16,17 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
 
-class PyPIViews(val securityService: SecurityService) : KoinComponent {
+class PyPIViews(private val securityService: SecurityService) : KoinComponent {
 
     val log = LoggerFactory.getLogger(javaClass)
 
-    val cfg: Config by inject()
+    private val cfg: Config by inject()
 
     fun views() = routes(
             "/upload" bind Method.POST to securityService.basicAuth().then(::upload)
     )
 
-    fun upload(request: Request): Response {
+    private fun upload(request: Request): Response {
         val groupName = request.path("group")!!
         val repoName = request.path("repo")!!
         // todo check access
@@ -69,4 +69,4 @@ class PyPIViews(val securityService: SecurityService) : KoinComponent {
     }
 }
 
-class PackageExists() : WebError(Status.CONFLICT, "Package already uploaded.")
+class PackageExists : WebError(Status.CONFLICT, "Package already uploaded.")

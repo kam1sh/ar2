@@ -7,7 +7,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
 
-class UsersServiceImpl(val securityService: SecurityService) : UsersService, KoinComponent {
+class UsersServiceImpl(private val securityService: SecurityService) : UsersService, KoinComponent {
     private val log = LoggerFactory.getLogger(UsersServiceImpl::class.java)
 
     private val factory: SessionFactory by inject()

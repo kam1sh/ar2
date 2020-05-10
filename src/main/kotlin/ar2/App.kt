@@ -28,6 +28,7 @@ import org.postgresql.ds.PGSimpleDataSource
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
+@Suppress("USELESS_CAST")
 val modules = module {
     single { SecurityServiceImpl() as SecurityService }
     single { UsersServiceImpl(get()) as UsersService }
@@ -112,9 +113,9 @@ class App : KoinComponent {
 }
 
 class CliApp(val app: App) : CliktCommand() {
-    val config: File? by option(help = "Path to configuration file", envvar = "AR2_CONFIG").file(exists = true, fileOkay = true)
-    val debug: Boolean by option(help = "Enable debug logging").flag()
-    val trace: Boolean by option(help = "Enable trace logging").flag()
+    private val config: File? by option(help = "Path to configuration file", envvar = "AR2_CONFIG").file(exists = true, fileOkay = true)
+    private val debug: Boolean by option(help = "Enable debug logging").flag()
+    private val trace: Boolean by option(help = "Enable trace logging").flag()
 
     override fun run() {
         var level = if (debug) Level.DEBUG else Level.WARN

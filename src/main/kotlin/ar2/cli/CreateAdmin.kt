@@ -21,7 +21,7 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
     val username: String by option(help = "Admin username").default("admin")
     val password: String by option().prompt("Enter password", hideInput = true)
 
-    var usersService: UsersService = get()
+    private var usersService: UsersService = get()
 
     override fun run() {
         try {

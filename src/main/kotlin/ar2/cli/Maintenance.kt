@@ -9,9 +9,7 @@ import org.koin.core.inject
 import org.slf4j.LoggerFactory
 
 class Maintenance(val app: App) : CliktCommand(), KoinComponent {
-    val log = LoggerFactory.getLogger(javaClass)
-
-    val sessionsService: SessionsService by inject()
+    private val sessionsService: SessionsService by inject()
 
     override fun run() {
         sessionsService.pruneOld(LocalDateTime.now())

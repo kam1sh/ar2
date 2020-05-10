@@ -22,7 +22,7 @@ class WebHandler(context: KoinComponent) {
 
     fun toHttpHandler(): HttpHandler = ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming)
             .then(ExceptionHandler())
-            .then(ServerFilters.InitialiseRequestContext(ar2.web.context))
+            .then(ServerFilters.InitialiseRequestContext(context))
             .then(LookupSessionTokenFilter()())
             .then(routes(
                     "/login" bind Method.POST to userViews::authenticate,

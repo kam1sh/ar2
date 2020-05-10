@@ -16,13 +16,13 @@ import org.slf4j.LoggerFactory
 const val ITERATIONS = 6
 val BCRYPT_VERSION: BCrypt.Version = BCrypt.Version.VERSION_2B
 
-class SecurityServiceImpl() : SecurityService, KoinComponent {
+class SecurityServiceImpl : SecurityService, KoinComponent {
     val log = LoggerFactory.getLogger(SecurityServiceImpl::class.java)
 
-    val usersService: UsersService by inject()
+    private val usersService: UsersService by inject()
 
-    val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
-    val verifier = BCrypt.verifyer(
+    private val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
+    private val verifier = BCrypt.verifyer(
         BCRYPT_VERSION, LongPasswordStrategies.hashSha512(
             BCRYPT_VERSION
         ))
