@@ -11,7 +11,7 @@ import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 
-class RepositoryGroupViews: KoinComponent {
+class RepositoryGroupViews : KoinComponent {
 
     private val groupsService: GroupsService by inject()
 
@@ -26,7 +26,7 @@ class RepositoryGroupViews: KoinComponent {
         request.checkApiAcceptHeader()
         val limit = request.query("limit") ?: "10"
         val offset = request.query("offset") ?: "0"
-        val groups =  groupsService.listGroups(limit.toInt(), offset.toInt())
+        val groups = groupsService.listGroups(limit.toInt(), offset.toInt())
         return listResponseLens(groups, Response(Status.OK))
     }
 

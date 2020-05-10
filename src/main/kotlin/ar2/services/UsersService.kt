@@ -2,7 +2,6 @@ package ar2.services
 
 import ar2.db.User
 import java.lang.Exception
-import org.jetbrains.exposed.sql.ResultRow
 
 class UserExists(val username: String) : Exception()
 

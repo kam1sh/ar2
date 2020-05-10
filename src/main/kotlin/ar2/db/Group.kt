@@ -2,7 +2,6 @@ package ar2.db
 
 import javax.persistence.*
 
-
 @Entity
 @Table(name = "groups")
 data class Group(

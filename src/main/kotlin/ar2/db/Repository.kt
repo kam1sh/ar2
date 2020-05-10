@@ -13,4 +13,3 @@ data class Repository(
     @JoinColumn(name = "group_id")
     var group: Group
 )
-

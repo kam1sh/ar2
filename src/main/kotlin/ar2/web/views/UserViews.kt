@@ -8,7 +8,6 @@ import ar2.services.SessionsService
 import ar2.services.UsersService
 import ar2.web.*
 import java.lang.Exception
-import java.time.Instant
 import java.time.LocalDateTime
 import java.util.*
 import java.util.concurrent.ThreadLocalRandom
@@ -21,11 +20,9 @@ import org.http4k.format.Jackson.auto
 import org.http4k.routing.bind
 import org.http4k.routing.path
 import org.http4k.routing.routes
-import org.joda.time.DateTime
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-
 
 class UserViews(
     private val usersService: UsersService,

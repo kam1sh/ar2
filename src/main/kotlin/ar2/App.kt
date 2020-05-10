@@ -56,7 +56,7 @@ class App : KoinComponent {
         lc.getLogger("ar2").level = level
     }
 
-    fun connectToDatabase() {
+    fun connectToDatabase(showSql: Boolean = false) {
         val ds = PGSimpleDataSource()
         val url = "jdbc:postgresql://${config.postgres.host}:${config.postgres.port}/${config.postgres.db}"
         ds.setURL(url)
@@ -78,8 +78,11 @@ class App : KoinComponent {
         props["hibernate.hikari.dataSource.url"] = url
         props["hibernate.hikari.dataSource.user"] = config.postgres.username
         props["hibernate.hikari.dataSource.password"] = config.postgres.password
+        props["hibernate.hikari.maximumPoolSize"] = "10"
+        props["hibernate.hikari.minimumIdle"] = "5"
+        props["hibernate.hikari.idleTimeout"] = "30000"
         props["hibernate.dialect"] = "org.hibernate.dialect.PostgreSQL10Dialect"
-        props["hibernate.show_sql"] = false
+        props["hibernate.show_sql"] = showSql
         val cfg = Configuration()
         cfg.properties = props
         cfg.addAnnotatedClass(User::class.java)
@@ -99,7 +102,7 @@ class App : KoinComponent {
     fun setup(configFile: File, logLevel: Level = Level.INFO) {
         loadConfig(configFile)
         setupLogging(logLevel)
-        connectToDatabase()
+        connectToDatabase(showSql = logLevel == Level.TRACE)
     }
 
     fun shutdown() {

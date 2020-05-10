@@ -12,7 +12,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.http4k.core.Method
 import org.http4k.core.Status
-import org.junit.Test
+import org.junit.jupiter.api.Test
 
 class UserViewsTest : EndToEndTest() {
     @Test

@@ -39,6 +39,8 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     // Use the Kotlin JUnit integration.
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.2'
     testImplementation "io.mockk:mockk:1.9.3"
 
     implementation group: "org.http4k", name: "http4k-core", version: "$http4k_version"
@@ -67,7 +69,6 @@ dependencies {
     implementation group: 'com.github.ajalt', name: 'clikt', version: '2.3.0'
 
     // database
-    // https://bintray.com/kotlin/exposed/exposed/view
     implementation group: 'org.hibernate', name: 'hibernate-core', version: "$hibernate_version"
     implementation group: 'org.hibernate', name: 'hibernate-entitymanager', version: "$hibernate_version"
     implementation group: 'org.hibernate', name: 'hibernate-hikaricp', version: "$hibernate_version"
@@ -86,6 +87,10 @@ compileTestKotlin {
     kotlinOptions {
         jvmTarget = "$targetJvm"
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 apply plugin: 'com.github.johnrengelman.shadow'

@@ -1,13 +1,11 @@
 package ar2.services
 
 import ar2.db.User
+import java.time.LocalDateTime
 import org.hibernate.SessionFactory
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
 
 class UsersServiceImpl(val securityService: SecurityService) : UsersService, KoinComponent {
     private val log = LoggerFactory.getLogger(UsersServiceImpl::class.java)

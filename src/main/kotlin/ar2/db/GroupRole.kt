@@ -1,7 +1,6 @@
 package ar2.db
 
 import ar2.users.Role
-import org.jetbrains.exposed.dao.IntIdTable
 import javax.persistence.*
 
 @Entity
@@ -21,4 +20,3 @@ data class GroupRole(
     @Enumerated(value = EnumType.STRING)
     var role: Role
 )
-

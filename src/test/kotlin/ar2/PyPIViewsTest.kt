@@ -3,7 +3,8 @@ package ar2
 import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
-import org.junit.Test
+import org.junit.jupiter.api.Test
+import org.koin.test.get
 
 class PyPIViewsTest : EndToEndTest() {
 
@@ -36,7 +37,7 @@ class PyPIViewsTest : EndToEndTest() {
                 .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
                 .header("content-type", "multipart/form-data; boundary=${body.boundary}")
                 .body(body)
-        val resp = handler(request)
+        val resp = get<HttpHandler>()(request)
         assertEquals(Status.CREATED, resp.status)
     }
 }
