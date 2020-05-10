@@ -21,6 +21,14 @@ class UsersServiceImpl(val securityService: SecurityService) : UsersService, Koi
         }
     }
 
+    override fun save(user: User) {
+        factory.openSession().use {
+            val tr = it.beginTransaction()
+            it.update(user)
+            tr.commit()
+        }
+    }
+
     override fun newUser(request: User, password: String): User {
         if (findByUsername(request.username) != null) {
             throw UserExists(request.username)

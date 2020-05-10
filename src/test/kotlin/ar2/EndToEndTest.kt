@@ -9,18 +9,14 @@ import java.nio.file.Files
 import java.nio.file.Path
 import org.hibernate.SessionFactory
 import org.http4k.core.HttpHandler
-import org.junit.AfterClass
-import org.junit.BeforeClass
-import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.TestInstance
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
 import org.koin.test.KoinTest
 import org.slf4j.LoggerFactory
+import org.testng.annotations.AfterSuite
+import org.testng.annotations.BeforeSuite
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 open class EndToEndTest : KoinTest {
 
     val log = LoggerFactory.getLogger(EndToEndTest::class.java)
@@ -29,7 +25,7 @@ open class EndToEndTest : KoinTest {
     lateinit var storagePath: Path
     lateinit var handler: HttpHandler
 
-    @BeforeAll
+    @BeforeSuite
     fun before() {
         startKoin { modules(modules) }
         app = App()
@@ -50,7 +46,7 @@ open class EndToEndTest : KoinTest {
         app.getKoin().declare(handler)
     }
 
-    @AfterAll
+    @AfterSuite
     fun after() {
         app.getKoin().get<SessionFactory>().openSession().use {
             val tr = it.beginTransaction()

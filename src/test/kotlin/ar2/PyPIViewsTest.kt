@@ -3,8 +3,8 @@ package ar2
 import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
-import org.junit.jupiter.api.Test
 import org.koin.test.get
+import org.testng.annotations.Test
 
 class PyPIViewsTest : EndToEndTest() {
 

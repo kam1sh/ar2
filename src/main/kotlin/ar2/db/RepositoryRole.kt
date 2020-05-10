@@ -10,11 +10,13 @@ data class RepositoryRole(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
 
-    @Column(name = "repo_id", nullable = false)
-    var repoId: Int,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "repo_id", nullable = false)
+    var repo: Repository,
 
-    @Column(name = "user_id", nullable = false)
-    var userId: Int,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User,
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)

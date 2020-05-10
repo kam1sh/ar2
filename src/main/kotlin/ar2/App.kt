@@ -86,6 +86,7 @@ class App : KoinComponent {
         val cfg = Configuration()
         cfg.properties = props
         cfg.addAnnotatedClass(User::class.java)
+        cfg.addAnnotatedClass(Group::class.java)
         cfg.addAnnotatedClass(GroupRole::class.java)
         cfg.addAnnotatedClass(Session::class.java)
         cfg.addAnnotatedClass(RepositoryRole::class.java)

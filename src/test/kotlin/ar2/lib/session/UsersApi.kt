@@ -17,6 +17,12 @@ class UsersApi(val session: Session) {
     }
 
     fun find(username: String): User? {
-        return iter().asSequence().find { it.username == username }
+        return session.request(Method.GET, "/users/username/$username")
+            .deserialize(User::class.java)
+    }
+
+    fun current(): User {
+        return session.request(Method.GET, "/users/current")
+            .deserialize(User::class.java)
     }
 }

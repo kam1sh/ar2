@@ -6,15 +6,21 @@ import ar2.lib.session.Credentials
 import ar2.lib.session.Session
 import ar2.lib.session.deserialize
 import ar2.web.views.UserViews
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import org.http4k.core.Method
 import org.http4k.core.Status
-import org.junit.jupiter.api.Test
+import org.testng.annotations.Test
+import kotlin.test.*
 
 class UserViewsTest : EndToEndTest() {
+
+    @Test
+    fun testCurrentWithNoSession() {
+        val sess = Session()
+        assertFailsWith<APIError> {
+            sess.request(Method.GET, "/users/current")
+        }
+    }
+
     @Test
     fun testLogin() {
         var sess = Session(Credentials("", ""))
@@ -24,8 +30,16 @@ class UserViewsTest : EndToEndTest() {
 
         sess = adminSession()
         assertNotNull(sess.cookie)
-        val resp = sess.request(Method.GET, "/users/_current", null).deserialize(User::class.java)
-        assertEquals("testadmin", resp.username)
+    }
+
+    @Test
+    fun testCurrent() {
+        val sess = adminSession()
+        val user = sess.users().current()
+        assertEquals("testadmin", user.username)
+        assertNull(user.passwordHash)
+        assertNotNull(user.createdOn)
+        assertNotNull(user.lastLogin)
     }
 
     @Test
@@ -44,7 +58,7 @@ class UserViewsTest : EndToEndTest() {
         assertEquals(Status.CREATED, resp.status)
         val user = sess.users().find("test")
         assertNotNull(user)
-        resp = sess.request(Method.DELETE, "/users/${user.id}")
+        resp = sess.request(Method.DELETE, "/users/id/${user.id}")
         assertEquals(Status.NO_CONTENT, resp.status)
     }
 }

@@ -37,9 +37,17 @@ class UserViews(
     fun views() = routes(
             "/" bind Method.GET to ::listUsers,
             "/" bind Method.POST to ::newUser,
-            "/_current" bind Method.GET to ::currentUser,
-            "/{id}" bind Method.DELETE to ::removeUser
+            "/current" bind Method.GET to ::currentUser,
+            "/id/{id}" bind Method.DELETE to ::removeUser,
+            "/username/{name}" bind Method.GET to ::findUserByUsername
         )
+
+    private fun findUserByUsername(request: Request): Response {
+        request.checkApiAcceptHeader()
+        val username = request.path("name")!!
+        val user = usersService.findByUsername(username)!!
+        return userResponseLens(user, Response(Status.OK))
+    }
 
     data class AuthRequest(val username: String, val password: String)
     data class AuthResponse(val message: String)
@@ -53,13 +61,18 @@ class UserViews(
         if (securityService.authenticate(Credentials(form.username, form.password)) == null)
             throw BadRequest("Invalid username or password.")
         val user = usersService.findByUsername(form.username)!!
+        user.lastLogin = LocalDateTime.now()
+        usersService.save(user)
         val byteArr = ByteArray(10)
         ThreadLocalRandom.current().nextBytes(byteArr)
         val cookieValue = String(byteArr).base64Encode()
         val expires = LocalDateTime.now().plusDays(cfg.security.sessionLifetimeDays.toLong())
         sessionsService.new(Session(cookieValue, user, expires))
         val cookie = Cookie(cfg.security.cookieName, cookieValue, expires = expires)
-        return authResponseLens(AuthResponse("Successfully authenticated as $user."), Response(Status.OK).cookie(cookie))
+        return authResponseLens(
+            AuthResponse("Successfully authenticated as $user."),
+            Response(Status.OK).cookie(cookie)
+        )
     }
 
     data class NewUserRequest(val user: User, val password: String)
@@ -78,7 +91,7 @@ class UserViews(
         } catch (e: Exception) {
             return Response(Status.CONFLICT).body("This user already exists.")
         }
-        return Response(Status.CREATED).header("Location", "/users/${user.id}")
+        return Response(Status.CREATED).header("Location", "/users/id/${user.id}")
     }
 
     val userResponseLens = Body.auto<User>().toLens()

@@ -2,6 +2,8 @@ package ar2.db
 
 import javax.persistence.*
 
+@Entity
+@Table(name = "repos")
 data class Repository(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
