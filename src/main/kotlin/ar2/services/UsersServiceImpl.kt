@@ -1,6 +1,6 @@
 package ar2.services
 
-import ar2.db.User
+import ar2.db.entities.User
 import java.time.LocalDateTime
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent

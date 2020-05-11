@@ -1,6 +1,6 @@
 package ar2.services
 
-import ar2.db.User
+import ar2.db.entities.User
 import java.lang.Exception
 
 class UserExists(val username: String) : Exception()

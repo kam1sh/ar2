@@ -1,4 +1,4 @@
-package ar2.db
+package ar2.db.entities
 
 import ar2.users.Role
 import javax.persistence.*

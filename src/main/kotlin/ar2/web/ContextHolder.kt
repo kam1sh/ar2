@@ -1,7 +1,7 @@
 package ar2.web
 
 import ar2.Config
-import ar2.db.User
+import ar2.db.entities.User
 import ar2.services.SessionsService
 import org.http4k.core.*
 import org.http4k.core.cookie.cookie

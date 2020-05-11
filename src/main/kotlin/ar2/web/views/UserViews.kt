@@ -1,12 +1,14 @@
 package ar2.web.views
 
 import ar2.Config
-import ar2.db.Session
-import ar2.db.User
+import ar2.db.entities.Session
+import ar2.db.entities.User
 import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.UsersService
 import ar2.web.*
+import java.time.LocalDateTime
+import java.util.concurrent.ThreadLocalRandom
 import org.hibernate.SessionFactory
 import org.http4k.base64Encode
 import org.http4k.core.*
@@ -19,8 +21,6 @@ import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-import java.time.LocalDateTime
-import java.util.concurrent.ThreadLocalRandom
 
 class UserViews(
     private val usersService: UsersService,

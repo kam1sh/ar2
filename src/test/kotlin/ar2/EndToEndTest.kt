@@ -1,6 +1,6 @@
 package ar2
 
-import ar2.db.User
+import ar2.db.entities.User
 import ar2.services.UsersService
 import ar2.web.WebHandler
 import ch.qos.logback.classic.Level

@@ -1,6 +1,6 @@
 package ar2.services
 
-import ar2.db.Group
+import ar2.db.entities.Group
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent
 import org.koin.core.inject

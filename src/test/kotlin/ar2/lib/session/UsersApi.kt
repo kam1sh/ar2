@@ -1,6 +1,6 @@
 package ar2.lib.session
 
-import ar2.db.User
+import ar2.db.entities.User
 import com.fasterxml.jackson.core.type.TypeReference
 import org.http4k.core.Method
 

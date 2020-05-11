@@ -1,7 +1,7 @@
 package ar2.services
 
-import ar2.db.Repository
-import ar2.db.User
+import ar2.db.entities.Repository
+import ar2.db.entities.User
 import ar2.users.Role
 
 interface AccessService {

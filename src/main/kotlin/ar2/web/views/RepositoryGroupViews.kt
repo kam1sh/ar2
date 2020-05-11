@@ -1,6 +1,6 @@
 package ar2.web.views
 
-import ar2.db.Group
+import ar2.db.entities.Group
 import ar2.services.GroupsService
 import ar2.web.checkApiAcceptHeader
 import ar2.web.checkApiCTHeader
