@@ -46,7 +46,7 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
     override fun encode(password: String): String = bCrypt.hashToString(ITERATIONS, password.toCharArray())
 
     override fun authenticate(creds: Credentials): User? {
-        val user = usersService.findByUsername(creds.user)
+        val user = usersService.find(creds.user)
         val result = user != null && verifier.verify(creds.password.toCharArray(), user.passwordHash!!.toCharArray()).verified
         return if (result) user else null
     }

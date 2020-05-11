@@ -9,7 +9,6 @@ import ar2.services.UsersService
 import ar2.web.*
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
-import org.hibernate.SessionFactory
 import org.http4k.base64Encode
 import org.http4k.core.*
 import org.http4k.core.cookie.Cookie
@@ -20,17 +19,14 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import org.slf4j.LoggerFactory
 
 class UserViews(
-    private val usersService: UsersService,
+    private val service: UsersService,
     private val securityService: SecurityService
 ) : KoinComponent {
-    private val log = LoggerFactory.getLogger(UserViews::class.java)
 
     private val cfg: Config by inject()
     private val sessionsService: SessionsService by inject()
-    private val factory: SessionFactory by inject()
 
     fun views() = routes(
             "/" bind Method.GET to ::listUsers,
@@ -43,7 +39,7 @@ class UserViews(
     private fun findUserByUsername(request: Request): Response {
         request.checkApiAcceptHeader()
         val username = request.path("name")!!
-        val user = usersService.findByUsername(username)!!
+        val user = service.find(username)!!
         return userResponseLens(user, Response(Status.OK))
     }
 
@@ -58,9 +54,9 @@ class UserViews(
         val form = authLens(request)
         if (securityService.authenticate(Credentials(form.username, form.password)) == null)
             throw BadRequest("Invalid username or password.")
-        val user = usersService.findByUsername(form.username)!!
+        val user = service.find(form.username)!!
         user.lastLogin = LocalDateTime.now()
-        usersService.save(user)
+        service.update(user)
         val byteArr = ByteArray(10)
         ThreadLocalRandom.current().nextBytes(byteArr)
         val cookieValue = String(byteArr).base64Encode()
@@ -85,7 +81,7 @@ class UserViews(
         }
         form.user.passwordHash = securityService.encode(form.password)
         val user = try {
-            usersService.newUser(form.user, form.password)
+            service.new(form.user, form.password)
         } catch (e: Exception) {
             return Response(Status.CONFLICT).body("This user already exists.")
         }
@@ -99,32 +95,20 @@ class UserViews(
     }
 
     val listUsersLens = Body.auto<List<User>>().toLens()
-    @Suppress("UNCHECKED_CAST")
     private fun listUsers(request: Request): Response {
         request.checkApiAcceptHeader()
         val limit = request.query("limit") ?: "10"
         val offset = request.query("offset") ?: "0"
-        val users: List<User> = factory.openSession().use {
-            it.createQuery("From User")
-                .setFirstResult(offset.toInt())
-                .setMaxResults(limit.toInt())
-                .list() as List<User>
-        }
+        val users = service.list(offset.toInt(), limit.toInt())
         return listUsersLens(users, Response(Status.OK))
     }
 
     private fun removeUser(request: Request): Response {
         if (!request.currentUser!!.isAdmin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
         val id = request.path("id")!!.toInt()
-        factory.openSession().use {
-            val user = it.find(User::class.java, id)
-            if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
-            val tr = it.beginTransaction()
-            it.createQuery("delete User where id = :id")
-                .setParameter("id", id)
-                .executeUpdate()
-            tr.commit()
-        }
+        val user = service.find(id)
+        if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
+        service.remove(id)
         return Response(Status.NO_CONTENT)
     }
 }

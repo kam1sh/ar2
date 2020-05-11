@@ -25,7 +25,7 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
 
     override fun run() {
         try {
-            usersService.newUser(
+            usersService.new(
                 User(
                     username = username,
                     email = email,

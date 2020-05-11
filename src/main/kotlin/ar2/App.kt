@@ -6,6 +6,7 @@ import ar2.cli.Serve
 import ar2.db.doConnectToDatabase
 import ar2.services.*
 import ar2.web.views.PyPIViews
+import ar2.web.views.RepositoryGroupViews
 import ar2.web.views.UserViews
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
@@ -32,6 +33,7 @@ val modules = module {
 
     single { UserViews(get(), get()) }
     single { PyPIViews(get()) }
+    single { RepositoryGroupViews() }
 }
 
 class App : KoinComponent, AutoCloseable {
