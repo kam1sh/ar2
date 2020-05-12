@@ -1,6 +1,7 @@
 package ar2.services
 
 import ar2.db.entities.User
+import ar2.db.transaction
 import java.time.LocalDateTime
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent
@@ -16,11 +17,7 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         }
         request.passwordHash = securityService.encode(password)
         request.createdOn = LocalDateTime.now()
-        factory.openSession().use {
-            val tr = it.beginTransaction()
-            it.save(request)
-            tr.commit()
-        }
+        transaction { it.save(request) }
         return request
     }
 
@@ -44,37 +41,31 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         it.find(User::class.java, id)
     }
 
-    override fun update(user: User) {
-        factory.openSession().use {
-            val tr = it.beginTransaction()
-            it.update(user)
-            tr.commit()
+    override fun update(user: User) = transaction {
+        it.update(user)
+    }
+
+    override fun remove(id: Int) {
+        transaction {
+            it.createQuery("delete User where id = :id")
+                .setParameter("id", id)
+                .executeUpdate()
         }
     }
 
-    override fun remove(id: Int) = factory.openSession().use {
-        val tr = it.beginTransaction()
-        it.createQuery("delete User where id = :id")
-            .setParameter("id", id)
-            .executeUpdate()
-        tr.commit()
-    }
-
-    override fun remove(username: String) = factory.openSession().use {
-        val tr = it.beginTransaction()
-        it.createQuery("delete User where username = :username")
-            .setParameter("username", username)
-            .executeUpdate()
-        tr.commit()
+    override fun remove(username: String) {
+        transaction {
+            it.createQuery("delete User where username = :username")
+                .setParameter("username", username)
+                .executeUpdate()
+        }
     }
 
     override fun changePassword(username: String, password: String) {
-        factory.openSession().use {
-            val user = find(username)
-            user?.passwordHash = securityService.encode(password)
-            val tr = it.beginTransaction()
-            it.update(user)
-            tr.commit()
+        transaction {
+            it.createQuery("update User set passwordHash = :hash")
+                .setParameter("hash", securityService.encode(password))
+                .executeUpdate()
         }
     }
 }

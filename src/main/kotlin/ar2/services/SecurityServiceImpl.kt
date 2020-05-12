@@ -50,9 +50,4 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
         val result = user != null && verifier.verify(creds.password.toCharArray(), user.passwordHash!!.toCharArray()).verified
         return if (result) user else null
     }
-
-    override fun giveGroupRole(user: User, group: String, role: Role) {
-//        val groupId = Groups.findIdByName(group)
-//         TODO
-    }
 }
