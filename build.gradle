@@ -89,6 +89,7 @@ compileTestKotlin {
 }
 
 test {
+    dependsOn 'cleanTest'
     useTestNG()
 }
 

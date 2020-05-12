@@ -19,6 +19,7 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.inject
+import java.lang.NumberFormatException
 
 class UserViews(
     private val service: UsersService,
@@ -33,7 +34,8 @@ class UserViews(
             "/" bind Method.POST to ::newUser,
             "/current" bind Method.GET to ::currentUser,
             "/id/{id}" bind Method.DELETE to ::removeUser,
-            "/username/{name}" bind Method.GET to ::findUserByUsername
+            "/username/{name}" bind Method.GET to ::findUserByUsername,
+            "/username/{name}" bind Method.DELETE to ::removeUserByName
         )
 
     private fun findUserByUsername(request: Request): Response {
@@ -105,10 +107,27 @@ class UserViews(
 
     private fun removeUser(request: Request): Response {
         if (!request.currentUser!!.isAdmin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
-        val id = request.path("id")!!.toInt()
+        val id = try {
+            request.path("id")!!.toInt()
+        } catch (e: NumberFormatException) {
+            return Response(Status.BAD_REQUEST)
+        }
         val user = service.find(id)
         if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
         service.remove(id)
         return Response(Status.NO_CONTENT)
     }
+
+    private fun removeUserByName(request: Request): Response {
+        request.currentUser!!.assertAdmin()
+        val name = request.path("name")!!
+        val user = service.find(name)!!
+        if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
+        service.remove(user.id!!)
+        return Response(Status.NO_CONTENT)
+    }
+}
+
+fun User.assertAdmin(msg: String? = null) {
+    if (!isAdmin) throw WebError(Status.FORBIDDEN, msg ?: "You don't have permission to do this.")
 }

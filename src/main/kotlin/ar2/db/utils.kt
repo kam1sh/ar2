@@ -12,8 +12,13 @@ object SessionFactoryHolder : KoinComponent {
 fun <T> transaction(statement: (Session) -> T): T {
     SessionFactoryHolder.factory.openSession().use {
         val tr = it.beginTransaction()
-        val result: T = statement(it)
-        tr.commit()
-        return result
+        try {
+            val result: T = statement(it)
+            tr.commit()
+            return result
+        } catch (e: Exception) {
+            tr.rollback()
+            throw e
+        }
     }
 }
