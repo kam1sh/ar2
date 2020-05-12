@@ -24,12 +24,11 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         return request
     }
 
-    @Suppress("UNCHECKED_CAST")
     override fun list(offset: Int, limit: Int): List<User> = factory.openSession().use {
-        it.createQuery("from User")
+        it.createQuery("from User", User::class.java)
             .setFirstResult(offset)
             .setMaxResults(limit)
-            .list() as List<User>
+            .list()
     }
 
     override fun find(username: String): User? {
@@ -53,14 +52,20 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         }
     }
 
-    override fun remove(id: Int) {
-        factory.openSession().use {
-            val tr = it.beginTransaction()
-            it.createQuery("delete User where id = :id")
-                .setParameter("id", id)
-                .executeUpdate()
-            tr.commit()
-        }
+    override fun remove(id: Int) = factory.openSession().use {
+        val tr = it.beginTransaction()
+        it.createQuery("delete User where id = :id")
+            .setParameter("id", id)
+            .executeUpdate()
+        tr.commit()
+    }
+
+    override fun remove(username: String) = factory.openSession().use {
+        val tr = it.beginTransaction()
+        it.createQuery("delete User where username = :username")
+            .setParameter("username", username)
+            .executeUpdate()
+        tr.commit()
     }
 
     override fun changePassword(username: String, password: String) {

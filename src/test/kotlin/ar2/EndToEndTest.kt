@@ -36,7 +36,7 @@ open class EndToEndTest : KoinTest {
             name = "admin",
             isAdmin = true
         )
-        app.get<UsersService>().new(
+        get<UsersService>().new(
             request = user,
             password = "test"
         )
@@ -48,13 +48,7 @@ open class EndToEndTest : KoinTest {
 
     @AfterSuite
     fun after() {
-        app.getKoin().get<SessionFactory>().openSession().use {
-            val tr = it.beginTransaction()
-            it.createQuery("delete from User where username = :username")
-                .setParameter("username", "testadmin")
-                .executeUpdate()
-            tr.commit()
-        }
+        get<UsersService>().remove("testadmin")
         stopKoin()
         log.info("Removing {}", storagePath)
         Files.walk(storagePath)

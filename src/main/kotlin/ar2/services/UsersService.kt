@@ -12,5 +12,6 @@ interface UsersService {
     fun find(id: Int): User
     fun update(user: User)
     fun remove(id: Int)
+    fun remove(username: String)
     fun changePassword(username: String, password: String)
 }
