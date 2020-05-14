@@ -1,7 +1,6 @@
 package ar2.services
 
 import ar2.db.entities.User
-import ar2.users.Role
 import org.http4k.core.Credentials
 import org.http4k.core.Filter
 

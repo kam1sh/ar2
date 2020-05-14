@@ -15,17 +15,17 @@ import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.get
 
-class WebHandler(context: KoinComponent) {
+class WebHandler : KoinComponent {
 
-    private val userViews: UserViews = context.get()
-    private val groupViews: RepositoryGroupViews = context.get()
-    private val pyPIViews: PyPIViews = context.get()
-    private val securityService: SecurityService = context.get()
+    private val userViews: UserViews = get()
+    private val groupViews: RepositoryGroupViews = get()
+    private val pyPIViews: PyPIViews = get()
+    private val securityService: SecurityService = get()
 
     fun toHttpHandler(): HttpHandler = ServerFilters.GZip(compressionMode = GzipCompressionMode.Streaming)
             .then(ExceptionHandler())
             .then(ServerFilters.InitialiseRequestContext(context))
-            .then(LookupSessionTokenFilter()())
+            .then(LookupSessionTokenFilter())
             .then(routes(
                     "/login" bind Method.POST to userViews::authenticate,
                     "/users" bind securityService.requireSession().then(userViews.views()),
@@ -34,4 +34,4 @@ class WebHandler(context: KoinComponent) {
             ))
 }
 
-fun App.getWebHandler() = WebHandler(this).toHttpHandler()
+fun App.getWebHandler() = WebHandler().toHttpHandler()

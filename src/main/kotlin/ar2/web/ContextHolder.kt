@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory
 val context = RequestContexts()
 val userKey = RequestContextKey.optional<User>(context)
 
-class LookupSessionTokenFilter : KoinComponent {
+object LookupSessionTokenFilter : KoinComponent {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private val cfg: Config by inject()
@@ -27,7 +27,11 @@ class LookupSessionTokenFilter : KoinComponent {
             val user = sessionsService.findUser(token.value)
             request.currentUser = user
         }
-        return next(request)
+        return try {
+            next(request)
+        } finally {
+            request.currentUser = null
+        }
     }
 }
 

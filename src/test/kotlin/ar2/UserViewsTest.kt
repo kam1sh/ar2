@@ -6,13 +6,14 @@ import ar2.lib.session.Credentials
 import ar2.lib.session.Session
 import ar2.services.UsersService
 import ar2.web.views.UserViews
+import java.lang.AssertionError
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
+import org.koin.core.KoinComponent
+import org.koin.core.get
 import org.koin.test.get
 import org.testng.annotations.Test
-import java.lang.AssertionError
-import java.lang.Exception
 
 class UserViewsTest : EndToEndTest() {
 
@@ -20,7 +21,7 @@ class UserViewsTest : EndToEndTest() {
     fun testCurrentWithNoSession() {
         val sess = Session()
         assertFailsWith<APIError> {
-            sess.request(Method.GET, "/users/current")
+            sess.users.current()
         }
     }
 
@@ -46,10 +47,18 @@ class UserViewsTest : EndToEndTest() {
     }
 
     @Test
-    fun testUserList() {
+    fun testList() {
         val sess = adminSession()
         val usersList = sess.users.list()
         assertTrue(usersList.count() > 0, "There is no users in list, expected more than zero")
+    }
+
+    @Test
+    fun testFindNotExistingUser() {
+        val sess = adminSession()
+        var error = assertFailsWith<APIError> { sess.users.find("notexisting") }
+        assertEquals(Status.NOT_FOUND, error.resp.status)
+        error = assertFailsWith<APIError> { sess.users.find(-1) }
     }
 
     @Test
@@ -69,31 +78,38 @@ class UserViewsTest : EndToEndTest() {
         assertEquals(Status.NO_CONTENT, resp.status)
     }
 
+    val testUser = User(
+        username = "test",
+        email = "test@test",
+        name = "testuser",
+        isAdmin = false
+    )
+
     @Test
     fun testNewUser() {
         val sess = adminSession()
-        var user = User(
-            username = "test",
-            email = "test@test",
-            name = "testuser",
-            isAdmin = false
-        )
-        get<UsersService>().new(user, "test123")
-        try {
+        withUser(testUser, "test123") {
             assertFailsWith<APIError> {
                 sess.request(Method.POST, "/users", UserViews.NewUserRequest(
-                    user, "test456"
+                    testUser, "test456"
                 ))
             }
-            user = sess.users.find("test") ?: throw AssertionError("Created user cannot be found")
+            val user = sess.users.find("test") ?: throw AssertionError("Created user cannot be found")
             assertNotNull(user)
             assertNull(user.lastLogin)
             val userSession = Session(Credentials(user.username, "test123"))
             userSession.login()
             assertEquals(userSession.users.current().id, user.id)
-        } finally {
-            get<UsersService>().remove(user.username)
         }
     }
+}
 
+fun <T> KoinComponent.withUser(user: User, password: String, callable: () -> T): T {
+    val service = get<UsersService>()
+    service.new(user, password)
+    return try {
+        callable()
+    } finally {
+        service.remove(user.username)
+    }
 }

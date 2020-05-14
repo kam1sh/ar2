@@ -16,13 +16,12 @@ class UsersApi(val session: Session) {
         return session.request(req).deserialize(object : TypeReference<List<User>>() {})
     }
 
-    fun find(username: String): User? {
-        return session.request(Method.GET, "/users/username/$username")
-            .deserialize(User::class.java)
-    }
+    fun find(username: String): User = session.request(Method.GET, "/users/username/$username")
+        .deserialize(User::class.java)
 
-    fun current(): User {
-        return session.request(Method.GET, "/users/current")
-            .deserialize(User::class.java)
-    }
+    fun find(id: Int): User = session.request(Method.GET, "/users/id/$id")
+        .deserialize(User::class.java)
+
+    fun current(): User = session.request(Method.GET, "/users/current")
+        .deserialize(User::class.java)
 }

@@ -7,7 +7,6 @@ import ch.qos.logback.classic.Level
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
-import org.hibernate.SessionFactory
 import org.http4k.core.HttpHandler
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
@@ -42,7 +41,7 @@ open class EndToEndTest : KoinTest {
         )
         storagePath = Files.createTempDirectory("packages")
         app.config.storage.path = storagePath.toString()
-        handler = WebHandler(app).toHttpHandler()
+        handler = WebHandler().toHttpHandler()
         app.getKoin().declare(handler)
     }
 

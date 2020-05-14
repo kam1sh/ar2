@@ -1,7 +1,9 @@
 package ar2.services
 
 import ar2.db.entities.User
+import ar2.db.pagedQuery
 import ar2.db.transaction
+import ar2.web.PageRequest
 import java.time.LocalDateTime
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent
@@ -21,11 +23,8 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         return request
     }
 
-    override fun list(offset: Int, limit: Int): List<User> = factory.openSession().use {
-        it.createQuery("from User", User::class.java)
-            .setFirstResult(offset)
-            .setMaxResults(limit)
-            .list()
+    override fun list(pr: PageRequest): List<User> = factory.openSession().use {
+        it.pagedQuery(pr, "from User", User::class.java)
     }
 
     override fun find(username: String): User? {

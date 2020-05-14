@@ -7,6 +7,7 @@ import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.UsersService
 import ar2.web.*
+import java.lang.NumberFormatException
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 import org.http4k.base64Encode
@@ -19,7 +20,6 @@ import org.http4k.routing.path
 import org.http4k.routing.routes
 import org.koin.core.KoinComponent
 import org.koin.core.inject
-import java.lang.NumberFormatException
 
 class UserViews(
     private val service: UsersService,
@@ -33,7 +33,8 @@ class UserViews(
             "/" bind Method.GET to ::listUsers,
             "/" bind Method.POST to ::newUser,
             "/current" bind Method.GET to ::currentUser,
-            "/id/{id}" bind Method.DELETE to ::removeUser,
+            "/id/{id}" bind Method.GET to ::findUserById,
+            "/id/{id}" bind Method.DELETE to ::removeUserById,
             "/username/{name}" bind Method.GET to ::findUserByUsername,
             "/username/{name}" bind Method.DELETE to ::removeUserByName
         )
@@ -41,7 +42,14 @@ class UserViews(
     private fun findUserByUsername(request: Request): Response {
         request.checkApiAcceptHeader()
         val username = request.path("name")!!
-        val user = service.find(username)!!
+        val user = service.find(username).orNotFound()
+        return userResponseLens(user, Response(Status.OK))
+    }
+
+    private fun findUserById(request: Request): Response {
+        request.checkApiAcceptHeader()
+        val id = request.path("id")!!.toIntOrNull() ?: throw BadRequest("Invalid ID.")
+        val user = service.find(id).orNotFound()
         return userResponseLens(user, Response(Status.OK))
     }
 
@@ -77,10 +85,8 @@ class UserViews(
     private fun newUser(request: Request): Response {
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
+        request.currentUser!!.assertAdmin()
         val form = userLens(request)
-        if (form.user.isAdmin && !request.currentUser!!.isAdmin) {
-            throw BadRequest("You don't have permission to create administrators.")
-        }
         form.user.passwordHash = securityService.encode(form.password)
         val user = try {
             service.new(form.user, form.password)
@@ -99,20 +105,19 @@ class UserViews(
     val listUsersLens = Body.auto<List<User>>().toLens()
     private fun listUsers(request: Request): Response {
         request.checkApiAcceptHeader()
-        val limit = request.query("limit") ?: "10"
-        val offset = request.query("offset") ?: "0"
-        val users = service.list(offset.toInt(), limit.toInt())
+        val pr = request.toPageRequest()
+        val users = service.list(pr)
         return listUsersLens(users, Response(Status.OK))
     }
 
-    private fun removeUser(request: Request): Response {
-        if (!request.currentUser!!.isAdmin) throw WebError(Status.FORBIDDEN, "You don't have permission to delete users.")
+    private fun removeUserById(request: Request): Response {
+        request.currentUser!!.assertAdmin()
         val id = try {
             request.path("id")!!.toInt()
         } catch (e: NumberFormatException) {
             return Response(Status.BAD_REQUEST)
         }
-        val user = service.find(id)
+        val user = service.find(id).orNotFound()
         if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
         service.remove(id)
         return Response(Status.NO_CONTENT)
@@ -127,6 +132,8 @@ class UserViews(
         return Response(Status.NO_CONTENT)
     }
 }
+
+fun User?.orNotFound(): User = this ?: throw WebError(Status.NOT_FOUND, "User not found.")
 
 fun User.assertAdmin(msg: String? = null) {
     if (!isAdmin) throw WebError(Status.FORBIDDEN, msg ?: "You don't have permission to do this.")

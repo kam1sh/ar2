@@ -20,3 +20,13 @@ fun Request.checkApiCTHeader() {
     if (!header.toLowerCase().contains("application/json; charset=utf-8"))
         throw WebError(Status.NOT_ACCEPTABLE, "Client body is not application/json with UTF-8 charset, can't process request")
 }
+
+data class PageRequest(val offset: Int, val limit: Int)
+
+fun Request.toPageRequest(): PageRequest {
+    val rawOffset = query("offset") ?: "0"
+    val rawLimit = query("limit") ?: "10"
+    val offset = rawOffset.toIntOrNull() ?: throw WebError(Status.BAD_REQUEST)
+    val limit = rawLimit.toIntOrNull() ?: throw WebError(Status.BAD_REQUEST)
+    return PageRequest(offset, limit)
+}
