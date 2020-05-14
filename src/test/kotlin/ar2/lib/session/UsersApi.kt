@@ -9,25 +9,25 @@ import org.http4k.core.Response
 class UsersApi(val session: Session) {
 
     fun new(user: User, password: String): Response =
-        session.request(Method.POST, "/users/", UserViews.NewUserRequest(
+        session.request(Method.POST, "/api/v1/users/", UserViews.NewUserRequest(
             user, password
         ))
 
     fun iter(): Iterator<User> = Paginator(::list)
 
     fun list(offset: Int = 0, limit: Int = 10): List<User> {
-        val req = session.prepareRequest(Method.GET, "/users")
+        val req = session.prepareRequest(Method.GET, "/api/v1/users")
             .query("offset", offset.toString())
             .query("limit", limit.toString())
         return session.request(req).deserialize(object : TypeReference<List<User>>() {})
     }
 
-    fun find(username: String): User = session.request(Method.GET, "/users/username/$username")
+    fun find(username: String): User = session.request(Method.GET, "/api/v1/users/username/$username")
         .deserialize(User::class.java)
 
-    fun find(id: Int): User = session.request(Method.GET, "/users/id/$id")
+    fun find(id: Int): User = session.request(Method.GET, "/api/v1/users/id/$id")
         .deserialize(User::class.java)
 
-    fun current(): User = session.request(Method.GET, "/users/current")
+    fun current(): User = session.request(Method.GET, "/api/v1/users/current")
         .deserialize(User::class.java)
 }

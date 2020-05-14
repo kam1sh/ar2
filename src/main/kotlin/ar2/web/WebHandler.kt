@@ -26,12 +26,14 @@ class WebHandler : KoinComponent {
             .then(ExceptionHandler())
             .then(ServerFilters.InitialiseRequestContext(context))
             .then(LookupSessionTokenFilter())
-            .then(routes(
-                    "/login" bind Method.POST to userViews::authenticate,
-                    "/users" bind securityService.requireSession().then(userViews.views()),
-                    "/groups" bind securityService.requireSession().then(groupViews.views()),
-                    "/py/{group}/{repo}" bind pyPIViews.views()
-            ))
+            .then(
+                routes("/api" bind apiRoutes()))
+    fun apiRoutes() = routes(
+        "/v1/login" bind Method.POST to userViews::authenticate,
+        "/v1/users" bind securityService.requireSession().then(userViews.views()),
+        "/v1/groups" bind securityService.requireSession().then(groupViews.views()),
+        "/py/{group}/{repo}" bind pyPIViews.views()
+    )
 }
 
 fun App.getWebHandler() = WebHandler().toHttpHandler()

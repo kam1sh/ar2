@@ -33,7 +33,7 @@ class PyPIViewsTest : EndToEndTest() {
         emptyFields.forEach { body = body.plus(it to "") }
         body = body.plus("file" to MultipartFormFile("example-0.1.0-py3-none-any.whl", ContentType.OCTET_STREAM, "content".byteInputStream()))
 
-        val request = Request(Method.POST, "/py/test/test/upload")
+        val request = Request(Method.POST, "/api/py/test/test/upload")
                 .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
                 .header("content-type", "multipart/form-data; boundary=${body.boundary}")
                 .body(body)

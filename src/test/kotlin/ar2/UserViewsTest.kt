@@ -38,7 +38,7 @@ class UserViewsTest : EndToEndTest() {
     @Test
     fun testInvalidCookie() {
         val sess = Session()
-        val request = sess.prepareRequest(Method.GET, "/users/current")
+        val request = sess.prepareRequest(Method.GET, "/api/v1/users/current")
             .cookie(get<Config>().security.cookieName, "123")
         val error = assertFailsWith<APIError> {
             sess.request(request)
@@ -91,7 +91,7 @@ class UserViewsTest : EndToEndTest() {
         val sess = adminSession()
         var resp = sess.users.new(testUser, "test123")
         assertEquals(Status.CREATED, resp.status)
-        resp = sess.request(Method.DELETE, "/users/username/${testUser.username}")
+        resp = sess.request(Method.DELETE, "/api/v1/users/username/${testUser.username}")
         assertEquals(Status.NO_CONTENT, resp.status)
     }
 
