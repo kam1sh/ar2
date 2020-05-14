@@ -13,7 +13,6 @@ class UsersApi(val session: Session) {
             user, password
         ))
 
-
     fun iter(): Iterator<User> = Paginator(::list)
 
     fun list(offset: Int = 0, limit: Int = 10): List<User> {

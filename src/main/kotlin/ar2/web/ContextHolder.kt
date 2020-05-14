@@ -23,18 +23,12 @@ object LookupSessionTokenFilter : KoinComponent {
 
     private fun doLookup(next: HttpHandler, request: Request): Response {
         val token = request.cookie(cfg.security.cookieName)
-        token?.let {
-            val user = sessionsService.findUser(token.value)
-            request.currentUser = user
+        val user = token?.let {
+            sessionsService.findUser(token.value)
         }
-        return try {
-            next(request)
-        } finally {
-            request.currentUser = null
-        }
+        return next(request.with(userKey of user))
     }
 }
 
-var Request.currentUser: User?
+val Request.currentUser: User?
     get() = userKey(this)
-    set(value) { userKey[this] = value }

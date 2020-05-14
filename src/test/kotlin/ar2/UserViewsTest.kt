@@ -5,8 +5,6 @@ import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
 import ar2.lib.session.Session
 import ar2.services.UsersService
-import ar2.web.views.UserViews
-import java.lang.AssertionError
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
