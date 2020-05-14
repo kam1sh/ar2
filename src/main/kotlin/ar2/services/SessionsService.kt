@@ -6,6 +6,6 @@ import java.time.LocalDateTime
 
 interface SessionsService {
     fun new(session: Session)
-    fun findUser(cookieValue: String): User
+    fun findUser(cookieValue: String): User?
     fun pruneOld(dt: LocalDateTime)
 }

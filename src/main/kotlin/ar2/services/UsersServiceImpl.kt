@@ -36,7 +36,7 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         }
     }
 
-    override fun find(id: Int): User = factory.openSession().use {
+    override fun find(id: Int): User? = factory.openSession().use {
         it.find(User::class.java, id)
     }
 

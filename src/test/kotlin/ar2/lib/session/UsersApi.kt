@@ -1,13 +1,20 @@
 package ar2.lib.session
 
 import ar2.db.entities.User
+import ar2.web.views.UserViews
 import com.fasterxml.jackson.core.type.TypeReference
 import org.http4k.core.Method
+import org.http4k.core.Response
 
 class UsersApi(val session: Session) {
-    fun iter(): Iterator<User> {
-        return Paginator(::list)
-    }
+
+    fun new(user: User, password: String): Response =
+        session.request(Method.POST, "/users/", UserViews.NewUserRequest(
+            user, password
+        ))
+
+
+    fun iter(): Iterator<User> = Paginator(::list)
 
     fun list(offset: Int = 0, limit: Int = 10): List<User> {
         val req = session.prepareRequest(Method.GET, "/users")

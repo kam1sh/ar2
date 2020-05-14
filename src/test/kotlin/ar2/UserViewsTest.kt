@@ -10,6 +10,7 @@ import java.lang.AssertionError
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
+import org.http4k.core.cookie.cookie
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.koin.test.get
@@ -37,6 +38,17 @@ class UserViewsTest : EndToEndTest() {
     }
 
     @Test
+    fun testInvalidCookie() {
+        val sess = Session()
+        val request = sess.prepareRequest(Method.GET, "/users/current")
+            .cookie(get<Config>().security.cookieName, "123")
+        val error = assertFailsWith<APIError> {
+            sess.request(request)
+        }
+        assertEquals(Status.UNAUTHORIZED, error.resp.status)
+    }
+
+    @Test
     fun testCurrent() {
         val sess = adminSession()
         val user = sess.users.current()
@@ -54,28 +66,19 @@ class UserViewsTest : EndToEndTest() {
     }
 
     @Test
+    fun testIterator() {
+        val sess = adminSession()
+        val users = sess.users.iter()
+        assertTrue(users.asSequence().count() > 0)
+    }
+
+    @Test
     fun testFindNotExistingUser() {
         val sess = adminSession()
         var error = assertFailsWith<APIError> { sess.users.find("notexisting") }
         assertEquals(Status.NOT_FOUND, error.resp.status)
         error = assertFailsWith<APIError> { sess.users.find(-1) }
-    }
-
-    @Test
-    fun testCreateDeleteUser() {
-        val sess = adminSession()
-        val user = User(
-            username = "test",
-            email = "test@test",
-            name = "testuser",
-            isAdmin = false
-        )
-        var resp = sess.request(Method.POST, "/users", UserViews.NewUserRequest(
-            user, "test123"
-        ))
-        assertEquals(Status.CREATED, resp.status)
-        resp = sess.request(Method.DELETE, "/users/username/${user.username}")
-        assertEquals(Status.NO_CONTENT, resp.status)
+        assertEquals(Status.NOT_FOUND, error.resp.status)
     }
 
     val testUser = User(
@@ -86,16 +89,22 @@ class UserViewsTest : EndToEndTest() {
     )
 
     @Test
+    fun testCreateDeleteUser() {
+        val sess = adminSession()
+        var resp = sess.users.new(testUser, "test123")
+        assertEquals(Status.CREATED, resp.status)
+        resp = sess.request(Method.DELETE, "/users/username/${testUser.username}")
+        assertEquals(Status.NO_CONTENT, resp.status)
+    }
+
+    @Test
     fun testNewUser() {
         val sess = adminSession()
         withUser(testUser, "test123") {
             assertFailsWith<APIError> {
-                sess.request(Method.POST, "/users", UserViews.NewUserRequest(
-                    testUser, "test456"
-                ))
+                sess.users.new(testUser, "test456")
             }
-            val user = sess.users.find("test") ?: throw AssertionError("Created user cannot be found")
-            assertNotNull(user)
+            val user = sess.users.find("test")
             assertNull(user.lastLogin)
             val userSession = Session(Credentials(user.username, "test123"))
             userSession.login()

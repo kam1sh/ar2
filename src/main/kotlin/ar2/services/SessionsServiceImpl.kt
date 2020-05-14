@@ -18,9 +18,9 @@ class SessionsServiceImpl : SessionsService, KoinComponent {
         }
     }
 
-    override fun findUser(cookieValue: String): User {
+    override fun findUser(cookieValue: String): User? {
         return sessions.openSession().use {
-            it.get(Session::class.java, cookieValue).user
+            it.get(Session::class.java, cookieValue)?.user
         }
     }
 
