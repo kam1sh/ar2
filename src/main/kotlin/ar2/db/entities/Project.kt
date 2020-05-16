@@ -3,8 +3,8 @@ package ar2.db.entities
 import javax.persistence.*
 
 @Entity
-@Table(name = "repos")
-data class Repository(
+@Table(name = "projects")
+data class Project(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int,
@@ -13,5 +13,8 @@ data class Repository(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id")
-    var group: Group
+    var group: Group,
+
+    @Column(name = "latest_version")
+    var latestVersion: String
 )

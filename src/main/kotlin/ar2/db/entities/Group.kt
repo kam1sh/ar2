@@ -7,8 +7,12 @@ import javax.persistence.*
 data class Group(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    var id: Int,
+    var id: Int? = null,
 
     @Column
-    var name: String
+    var name: String,
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    var owner: User
 )

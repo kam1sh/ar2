@@ -60,8 +60,8 @@ class Session(val creds: Credentials? = null) : KoinComponent {
         return resp
     }
 
-    val users
-        get() = UsersApi(this)
+    val users get() = UsersApi(this)
+    val groups get() = GroupsApi(this)
 }
 
 data class ApiResult<T>(val resp: Response, val body: T?)

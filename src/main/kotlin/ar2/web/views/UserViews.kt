@@ -3,6 +3,7 @@ package ar2.web.views
 import ar2.Config
 import ar2.db.entities.Session
 import ar2.db.entities.User
+import ar2.exceptions.WebError
 import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.UsersService
@@ -48,7 +49,7 @@ class UserViews(
 
     private fun findUserById(request: Request): Response {
         request.checkApiAcceptHeader()
-        val id = request.path("id")!!.toIntOrNull() ?: throw BadRequest("Invalid ID.")
+        val id = request.path("id")!!.toIntOrNull() ?: throw WebError(Status.BAD_REQUEST, "Invalid ID.")
         val user = service.find(id).orNotFound()
         return userResponseLens(user, Response(Status.OK))
     }
@@ -63,8 +64,8 @@ class UserViews(
         request.checkApiCTHeader()
         val form = authLens(request)
         if (securityService.authenticate(Credentials(form.username, form.password)) == null)
-            throw BadRequest("Invalid username or password.")
-        val user = service.find(form.username)!!
+            throw WebError(Status.BAD_REQUEST,"Invalid username or password.", "INVALID_USERNAME_OR_PASSWORD")
+        val user = service.find(form.username)
         user.lastLogin = LocalDateTime.now()
         service.update(user)
         val byteArr = ByteArray(10)
@@ -118,7 +119,7 @@ class UserViews(
             return Response(Status.BAD_REQUEST)
         }
         val user = service.find(id).orNotFound()
-        if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
+        if (request.currentUser!!.id == user.id) throw WebError(Status.BAD_REQUEST, "You cannot remove yourself =/", "CANNOT_REMOVE_YOURSELF")
         service.remove(id)
         return Response(Status.NO_CONTENT)
     }
@@ -126,15 +127,21 @@ class UserViews(
     private fun removeUserByName(request: Request): Response {
         request.currentUser!!.assertAdmin()
         val name = request.path("name")!!
-        val user = service.find(name)!!
-        if (request.currentUser!!.id == user.id) throw BadRequest("You cannot remove yourself =/")
+        val user = service.find(name)
+        if (request.currentUser!!.id == user.id) throw WebError(Status.BAD_REQUEST, "You cannot remove yourself =/", "CANNOT_REMOVE_YOURSELF")
         service.remove(user.id!!)
         return Response(Status.NO_CONTENT)
     }
 }
 
-fun User?.orNotFound(): User = this ?: throw WebError(Status.NOT_FOUND, "User not found.")
+fun User?.orNotFound(): User = this ?: throw WebError(
+    Status.NOT_FOUND,
+    "User not found."
+)
 
 fun User.assertAdmin(msg: String? = null) {
-    if (!isAdmin) throw WebError(Status.FORBIDDEN, msg ?: "You don't have permission to do this.")
+    if (!isAdmin) throw WebError(
+        Status.FORBIDDEN,
+        msg ?: "You don't have permission to do this."
+    )
 }

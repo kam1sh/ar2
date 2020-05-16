@@ -10,13 +10,21 @@ data class GroupRole(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
 
-    @Column(name = "group_id", nullable = false)
-    var groupId: Int,
+    @Column(name = "user_id")
+    var userId: Int? = null,
 
-    @Column(name = "user_id", nullable = false)
-    var userId: Int,
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, insertable = false, updatable = false)
+    var user: User? = null,
+
+    @Column(name = "group_id")
+    var groupId: Int? = null,
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id", nullable = false, insertable = false, updatable = false)
+    var group: Group? = null,
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)
-    var role: Role
+    var role: Role? = null
 )

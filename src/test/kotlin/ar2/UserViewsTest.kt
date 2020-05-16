@@ -14,6 +14,13 @@ import org.koin.core.get
 import org.koin.test.get
 import org.testng.annotations.Test
 
+val testUser = User(
+    username = "test",
+    email = "test@test",
+    name = "testuser",
+    isAdmin = false
+)
+
 class UserViewsTest : EndToEndTest() {
 
     @Test
@@ -79,13 +86,6 @@ class UserViewsTest : EndToEndTest() {
         assertEquals(Status.NOT_FOUND, error.resp.status)
     }
 
-    val testUser = User(
-        username = "test",
-        email = "test@test",
-        name = "testuser",
-        isAdmin = false
-    )
-
     @Test
     fun testCreateDeleteUser() {
         val sess = adminSession()
@@ -113,7 +113,7 @@ class UserViewsTest : EndToEndTest() {
 
 fun <T> KoinComponent.withUser(user: User, password: String, callable: () -> T): T {
     val service = get<UsersService>()
-    service.new(user, password)
+    service.new(user.copy(), password)
     return try {
         callable()
     } finally {

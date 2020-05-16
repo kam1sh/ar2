@@ -38,8 +38,8 @@ fun doConnectToDatabase(config: PostgresSettings, showSql: Boolean = false): Ses
         addAnnotatedClass(Group::class.java)
         addAnnotatedClass(GroupRole::class.java)
         addAnnotatedClass(Session::class.java)
-        addAnnotatedClass(RepositoryRole::class.java)
-        addAnnotatedClass(Repository::class.java)
+        addAnnotatedClass(ProjectRole::class.java)
+        addAnnotatedClass(Project::class.java)
     }
     val builder = StandardServiceRegistryBuilder()
         .applySettings(cfg.properties)

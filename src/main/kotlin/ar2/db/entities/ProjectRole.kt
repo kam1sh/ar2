@@ -4,19 +4,19 @@ import ar2.users.Role
 import javax.persistence.*
 
 @Entity
-@Table(name = "repository_roles")
-data class RepositoryRole(
+@Table(name = "project_roles")
+data class ProjectRole(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Int? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "repo_id", nullable = false)
-    var repo: Repository,
-
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     var user: User,
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id", nullable = false)
+    var project: Project,
 
     @Column(nullable = false)
     @Enumerated(value = EnumType.STRING)

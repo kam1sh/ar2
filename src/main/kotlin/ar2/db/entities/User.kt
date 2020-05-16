@@ -33,5 +33,8 @@ data class User(
     var createdOn: LocalDateTime? = null,
 
     @Column(name = "last_login")
-    var lastLogin: LocalDateTime? = null
+    var lastLogin: LocalDateTime? = null,
+
+    @Column(name = "disabled")
+    var disabled: Boolean = false
 )

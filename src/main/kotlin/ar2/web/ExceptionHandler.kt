@@ -1,5 +1,6 @@
 package ar2.web
 
+import ar2.exceptions.Ar2Exception
 import java.lang.Exception
 import org.http4k.core.*
 import org.http4k.format.Jackson.auto
@@ -16,11 +17,13 @@ object ExceptionHandler {
         { req: Request ->
             try {
                 next(req)
-            } catch (responseExc: WebResult) {
-                log.trace("Returning WebResult, message - {}", responseExc.message())
-                responseExc.toResponse()
+            } catch (responseExc: Ar2Exception) {
+                log.trace("Returning WebResult, message - {}", responseExc.message)
+                responseExc.toHTTPResponse()
             } catch (exc: LensFailure) {
                 log.debug("Error parsing request body: '{}'", exc.message)
+                log.trace("Exception info: ", exc)
+                if (log.isTraceEnabled) log.trace("Body: {}", req.bodyString())
                 BRLens(BadRequestBody("Invalid body provided"), Response(Status.BAD_REQUEST))
             } catch (exc: Exception) {
                 log.error("Caught exception:", exc)

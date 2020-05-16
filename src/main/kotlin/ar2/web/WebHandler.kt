@@ -2,8 +2,8 @@ package ar2.web
 
 import ar2.App
 import ar2.services.SecurityService
+import ar2.web.views.GroupViews
 import ar2.web.views.PyPIViews
-import ar2.web.views.RepositoryGroupViews
 import ar2.web.views.UserViews
 import org.http4k.core.HttpHandler
 import org.http4k.core.Method
@@ -18,7 +18,7 @@ import org.koin.core.get
 class WebHandler : KoinComponent {
 
     private val userViews: UserViews = get()
-    private val groupViews: RepositoryGroupViews = get()
+    private val groupViews: GroupViews = get()
     private val pyPIViews: PyPIViews = get()
     private val securityService: SecurityService = get()
 

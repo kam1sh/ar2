@@ -9,8 +9,8 @@ class UserExists(val username: String) : Exception()
 interface UsersService {
     fun new(request: User, password: String): User
     fun list(pr: PageRequest): List<User>
-    fun find(username: String): User?
-    fun find(id: Int): User?
+    fun find(username: String): User
+    fun find(id: Int): User
     fun update(user: User)
     fun remove(id: Int)
     fun remove(username: String)

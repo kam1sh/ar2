@@ -3,6 +3,7 @@ package ar2.services
 import ar2.db.entities.User
 import ar2.db.pagedQuery
 import ar2.db.transaction
+import ar2.exceptions.NoSuchUserException
 import ar2.web.PageRequest
 import java.time.LocalDateTime
 import org.hibernate.SessionFactory
@@ -14,9 +15,10 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
     private val factory: SessionFactory by inject()
 
     override fun new(request: User, password: String): User {
-        if (find(request.username) != null) {
+        try {
+            find(request.username)
             throw UserExists(request.username)
-        }
+        } catch (ignored: NoSuchUserException) {}
         request.passwordHash = securityService.encode(password)
         request.createdOn = LocalDateTime.now()
         transaction { it.save(request) }
@@ -27,17 +29,17 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         it.pagedQuery(pr, "from User", User::class.java)
     }
 
-    override fun find(username: String): User? {
+    override fun find(username: String): User {
         factory.openSession().use {
             val user = it.createQuery("from User where username = :username")
                 .setParameter("username", username)
-                .uniqueResult()
-            return user as User?
+                .uniqueResult() as User?
+            return user ?: throw NoSuchUserException()
         }
     }
 
-    override fun find(id: Int): User? = factory.openSession().use {
-        it.find(User::class.java, id)
+    override fun find(id: Int): User = factory.openSession().use {
+        it.find(User::class.java, id) ?: throw NoSuchUserException()
     }
 
     override fun update(user: User) = transaction {
@@ -62,7 +64,8 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
 
     override fun changePassword(username: String, password: String) {
         transaction {
-            it.createQuery("update User set passwordHash = :hash")
+            it.createQuery("update User set passwordHash = :hash where username = :username")
+                .setParameter("username", username)
                 .setParameter("hash", securityService.encode(password))
                 .executeUpdate()
         }
