@@ -91,7 +91,7 @@ class UserViewsTest : EndToEndTest() {
         val sess = adminSession()
         var resp = sess.users.new(testUser, "test123")
         assertEquals(Status.CREATED, resp.status)
-        resp = sess.request(Method.DELETE, "/api/v1/users/username/${testUser.username}")
+        resp = sess.request(Method.POST, "/api/v1/users/username/${testUser.username}/disable")
         assertEquals(Status.NO_CONTENT, resp.status)
     }
 
@@ -103,7 +103,8 @@ class UserViewsTest : EndToEndTest() {
                 sess.users.new(testUser, "test456")
             }
             val user = sess.users.find("test")
-            assertNull(user.lastLogin)
+            // may not be null if user was enabled instead of created
+//            assertNull(user.lastLogin)
             val userSession = Session(Credentials(user.username, "test123"))
             userSession.login()
             assertEquals(userSession.users.current().id, user.id)
@@ -117,6 +118,7 @@ fun <T> KoinComponent.withUser(user: User, password: String, callable: () -> T):
     return try {
         callable()
     } finally {
-        service.remove(user.username)
+        val usr = service.find(user.username)
+        service.disable(usr)
     }
 }

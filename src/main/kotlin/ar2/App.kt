@@ -4,6 +4,8 @@ import ar2.cli.CreateAdmin
 import ar2.cli.Maintenance
 import ar2.cli.Serve
 import ar2.db.doConnectToDatabase
+import ar2.facades.UsersFacade
+import ar2.facades.UsersFacadeImpl
 import ar2.services.*
 import ar2.web.views.GroupViews
 import ar2.web.views.PyPIViews
@@ -31,7 +33,9 @@ val modules = module {
     single { SessionsServiceImpl() as SessionsService }
     single { GroupsServiceImpl() as GroupsService }
 
-    single { UserViews(get(), get()) }
+    single { UsersFacadeImpl(get()) as UsersFacade }
+
+    single { UserViews(get(), get(), get()) }
     single { PyPIViews(get()) }
     single { GroupViews(get(), get()) }
 }

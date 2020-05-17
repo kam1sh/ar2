@@ -1,6 +1,8 @@
 package ar2.db.entities
 
+import ar2.exceptions.WebError
 import com.fasterxml.jackson.annotation.JsonIgnore
+import org.http4k.core.Status
 import java.time.LocalDateTime
 import javax.persistence.*
 import javax.persistence.Column
@@ -38,3 +40,10 @@ data class User(
     @Column(name = "disabled")
     var disabled: Boolean = false
 )
+
+fun User.assertAdmin(msg: String? = null) {
+    if (!isAdmin) throw WebError(
+        Status.FORBIDDEN,
+        msg ?: "You don't have permission to do this."
+    )
+}

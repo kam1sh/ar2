@@ -1,8 +1,10 @@
 package ar2.services
 
 import ar2.db.entities.User
+import ar2.db.entities.assertAdmin
 import ar2.db.pagedQuery
 import ar2.db.transaction
+import ar2.exceptions.IllegalActionException
 import ar2.exceptions.NoSuchUserException
 import ar2.web.PageRequest
 import java.time.LocalDateTime
@@ -14,19 +16,34 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
 
     private val factory: SessionFactory by inject()
 
-    override fun new(request: User, password: String): User {
-        try {
-            find(request.username)
-            throw UserExists(request.username)
-        } catch (ignored: NoSuchUserException) {}
-        request.passwordHash = securityService.encode(password)
-        request.createdOn = LocalDateTime.now()
-        transaction { it.save(request) }
-        return request
+    override fun new(request: User, password: String, issuer: User): User {
+        issuer.assertAdmin()
+        return new(request, password)
     }
 
+    override fun new(request: User, password: String): User {
+        // firstly try to find and restore user
+        try {
+            val user = find(request.username)
+            if (!user.disabled) throw IllegalActionException("User exists.", "USER_EXISTS")
+            enable(user)
+            return user
+        } catch (ignored: NoSuchUserException) {}
+        // and then create new user
+        val user = request.copy(
+            id = null,
+            passwordHash = securityService.encode(password),
+            createdOn = LocalDateTime.now(),
+            lastLogin = null,
+            disabled = false
+        )
+        transaction { it.save(user) }
+        return user
+    }
+
+
     override fun list(pr: PageRequest): List<User> = factory.openSession().use {
-        it.pagedQuery(pr, "from User", User::class.java)
+        it.pagedQuery(pr, "from User where disabled = false", User::class.java)
     }
 
     override fun find(username: String): User {
@@ -46,20 +63,14 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         it.update(user)
     }
 
-    override fun remove(id: Int) {
-        transaction {
-            it.createQuery("delete User where id = :id")
-                .setParameter("id", id)
-                .executeUpdate()
-        }
+    override fun disable(user: User) {
+        user.disabled = true
+        transaction { it.update(user) }
     }
 
-    override fun remove(username: String) {
-        transaction {
-            it.createQuery("delete User where username = :username")
-                .setParameter("username", username)
-                .executeUpdate()
-        }
+    override fun enable(user: User) {
+        user.disabled = false
+        transaction { it.update(user) }
     }
 
     override fun changePassword(username: String, password: String) {

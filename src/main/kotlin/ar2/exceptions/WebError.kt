@@ -6,7 +6,6 @@ import org.http4k.format.Jackson.auto
 open class WebError : Ar2Exception {
     private var status: Status
     private var msg: String
-    private var codeText: String
 
     constructor(status: Status, msg: String, codeText: String) : super(msg, hideStackTrace = true) {
         this.status = status
@@ -26,11 +25,11 @@ open class WebError : Ar2Exception {
         codeText = err.codeText
     }
 
-    data class Payload(val message: String, val codeText: String)
-    val payloadLens = Body.auto<Payload>().toLens()
+    data class WebErrorPayload(val message: String, val codeText: String)
+    val webErrorPayloadLens = Body.auto<WebErrorPayload>().toLens()
 
     override fun toHTTPResponse(): Response {
-        val payload = Payload(msg, codeText)
-        return payloadLens(payload, Response(status))
+        val payload = WebErrorPayload(msg, codeText!!)
+        return webErrorPayloadLens(payload, Response(status))
     }
 }

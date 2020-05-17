@@ -3,7 +3,9 @@ package ar2.web.views
 import ar2.Config
 import ar2.db.entities.Session
 import ar2.db.entities.User
+import ar2.exceptions.NoSuchUserException
 import ar2.exceptions.WebError
+import ar2.facades.UsersFacade
 import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.UsersService
@@ -24,6 +26,7 @@ import org.koin.core.inject
 
 class UserViews(
     private val service: UsersService,
+    private val facade: UsersFacade,
     private val securityService: SecurityService
 ) : KoinComponent {
 
@@ -35,9 +38,9 @@ class UserViews(
             "/" bind Method.POST to ::newUser,
             "/current" bind Method.GET to ::currentUser,
             "/id/{id}" bind Method.GET to ::findUserById,
-            "/id/{id}" bind Method.DELETE to ::removeUserById,
+            "/id/{id}/disable" bind Method.POST to ::disableUserById,
             "/username/{name}" bind Method.GET to ::findUserByUsername,
-            "/username/{name}" bind Method.DELETE to ::removeUserByName
+            "/username/{name}/disable" bind Method.POST to ::disableUserByName
         )
 
     private fun findUserByUsername(request: Request): Response {
@@ -59,12 +62,12 @@ class UserViews(
     val authLens = Body.auto<AuthRequest>().toLens()
     val authResponseLens = Body.auto<AuthResponse>().toLens()
 
-    fun authenticate(request: Request): Response {
+    fun authenticateByCredentials(request: Request): Response {
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
         val form = authLens(request)
         if (securityService.authenticate(Credentials(form.username, form.password)) == null)
-            throw WebError(Status.BAD_REQUEST,"Invalid username or password.", "INVALID_USERNAME_OR_PASSWORD")
+            throw WebError(Status.BAD_REQUEST, "Invalid username or password.", "INVALID_USERNAME_OR_PASSWORD")
         val user = service.find(form.username)
         user.lastLogin = LocalDateTime.now()
         service.update(user)
@@ -86,20 +89,14 @@ class UserViews(
     private fun newUser(request: Request): Response {
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
-        request.currentUser!!.assertAdmin()
         val form = userLens(request)
-        form.user.passwordHash = securityService.encode(form.password)
-        val user = try {
-            service.new(form.user, form.password)
-        } catch (e: Exception) {
-            return Response(Status.CONFLICT).body("This user already exists.")
-        }
+        val user = service.new(form.user, form.password, request.currentUser)
         return Response(Status.CREATED).header("Location", "/users/id/${user.id}")
     }
 
     val userResponseLens = Body.auto<User>().toLens()
     private fun currentUser(request: Request): Response {
-        val body = request.currentUser!!
+        val body = request.currentUser
         return userResponseLens(body, Response(Status.OK))
     }
 
@@ -111,37 +108,22 @@ class UserViews(
         return listUsersLens(users, Response(Status.OK))
     }
 
-    private fun removeUserById(request: Request): Response {
-        request.currentUser!!.assertAdmin()
+    private fun disableUserById(request: Request): Response {
         val id = try {
             request.path("id")!!.toInt()
         } catch (e: NumberFormatException) {
             return Response(Status.BAD_REQUEST)
         }
-        val user = service.find(id).orNotFound()
-        if (request.currentUser!!.id == user.id) throw WebError(Status.BAD_REQUEST, "You cannot remove yourself =/", "CANNOT_REMOVE_YOURSELF")
-        service.remove(id)
+        facade.disable(id, request.currentUser)
         return Response(Status.NO_CONTENT)
     }
 
-    private fun removeUserByName(request: Request): Response {
-        request.currentUser!!.assertAdmin()
+    private fun disableUserByName(request: Request): Response {
         val name = request.path("name")!!
-        val user = service.find(name)
-        if (request.currentUser!!.id == user.id) throw WebError(Status.BAD_REQUEST, "You cannot remove yourself =/", "CANNOT_REMOVE_YOURSELF")
-        service.remove(user.id!!)
+        facade.disable(name, request.currentUser)
         return Response(Status.NO_CONTENT)
     }
 }
 
-fun User?.orNotFound(): User = this ?: throw WebError(
-    Status.NOT_FOUND,
-    "User not found."
-)
+fun User?.orNotFound(): User = this ?: throw NoSuchUserException(Status.NOT_FOUND)
 
-fun User.assertAdmin(msg: String? = null) {
-    if (!isAdmin) throw WebError(
-        Status.FORBIDDEN,
-        msg ?: "You don't have permission to do this."
-    )
-}

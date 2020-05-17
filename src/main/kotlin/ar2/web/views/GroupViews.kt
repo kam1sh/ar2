@@ -42,7 +42,7 @@ class GroupViews(
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
         val groupForm = groupLens(request)
-        service.new(groupForm.name, request.currentUser!!)
+        service.new(groupForm.name, request.currentUser)
         return Response(Status.CREATED)
     }
 
@@ -64,7 +64,11 @@ class GroupViews(
         } catch (e: NoSuchUserException) {
             throw WebError(e, Status.BAD_REQUEST)
         }
-        service.addUserRole(group, user, form.role)
+        try {
+            service.addUserRole(group, user, form.role)
+        } catch (exc: NoSuchGroupException) {
+            return exc.toHTTPResponse().status(Status.BAD_REQUEST)
+        }
         return Response(Status.NO_CONTENT)
     }
 

@@ -2,6 +2,7 @@ package ar2.web
 
 import ar2.Config
 import ar2.db.entities.User
+import ar2.exceptions.WebError
 import ar2.services.SessionsService
 import org.http4k.core.*
 import org.http4k.core.cookie.cookie
@@ -30,5 +31,5 @@ object LookupSessionTokenFilter : KoinComponent {
     }
 }
 
-val Request.currentUser: User?
-    get() = userKey(this)
+val Request.currentUser: User
+    get() = userKey(this) ?: throw WebError(Status.UNAUTHORIZED, "Not authorised.", "UNAUTHORISED")

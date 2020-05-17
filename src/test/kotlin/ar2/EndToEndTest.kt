@@ -1,6 +1,7 @@
 package ar2
 
 import ar2.db.entities.User
+import ar2.facades.UsersFacade
 import ar2.services.UsersService
 import ar2.web.WebHandler
 import ch.qos.logback.classic.Level
@@ -47,7 +48,7 @@ open class EndToEndTest : KoinTest {
 
     @AfterSuite
     fun after() {
-        get<UsersService>().remove("testadmin")
+        get<UsersFacade>().disable("testadmin")
         stopKoin()
         log.info("Removing {}", storagePath)
         Files.walk(storagePath)

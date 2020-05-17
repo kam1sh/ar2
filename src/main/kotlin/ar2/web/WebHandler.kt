@@ -29,7 +29,7 @@ class WebHandler : KoinComponent {
             .then(
                 routes("/api" bind apiRoutes()))
     fun apiRoutes() = routes(
-        "/v1/login" bind Method.POST to userViews::authenticate,
+        "/v1/login" bind Method.POST to userViews::authenticateByCredentials,
         "/v1/users" bind securityService.requireSession().then(userViews.views()),
         "/v1/groups" bind securityService.requireSession().then(groupViews.views()),
         "/py/{group}/{repo}" bind pyPIViews.views()
