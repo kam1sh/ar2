@@ -1,7 +1,6 @@
 package ar2.exceptions
 
 import org.http4k.core.*
-import org.http4k.format.Jackson.auto
 
 class WebError : Ar2Exception {
     private var status: Status
@@ -24,9 +23,6 @@ class WebError : Ar2Exception {
         msg = exc.message!!
         codeText = exc.codeText
     }
-
-    data class WebErrorPayload(val message: String, val codeText: String)
-    val webErrorPayloadLens = Body.auto<WebErrorPayload>().toLens()
 
     override fun toHTTPResponse(): Response {
         val payload = WebErrorPayload(msg, codeText!!)

@@ -33,10 +33,13 @@ interface UsersService {
 
     /**
      * Saves new user information.
-     * @throws UserDisabled when user disabled.
+     * @throws UserDisabledExce when user disabled.
      */
     fun update(id: Int, form: User, password: String, issuer: User): User
 
+    /**
+     * Saves user information.
+     */
     fun update(user: User)
 
     /**

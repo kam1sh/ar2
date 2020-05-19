@@ -1,5 +1,6 @@
-package ar2
+package ar2.tests
 
+import ar2.App
 import ar2.db.entities.User
 import ar2.facades.UsersFacade
 import ar2.services.UsersService
@@ -27,7 +28,7 @@ open class EndToEndTest : KoinTest {
 
     @BeforeSuite
     fun before() {
-        startKoin { modules(modules) }
+        startKoin { modules(ar2.modules) }
         app = App()
         app.setup(File("ar2.yaml"), logLevel = Level.TRACE)
         val user = User(

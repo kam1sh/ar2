@@ -1,5 +1,6 @@
-package ar2
+package ar2.tests
 
+import ar2.lib.session.adminSession
 import ar2.lib.session.APIError
 import ar2.services.GroupsService
 import ar2.services.UsersService
@@ -24,10 +25,11 @@ class GroupsTest : EndToEndTest() {
     @Test
     fun testGroupRole() {
         val sess = adminSession()
-        withUser(testUser, "test123") {
+        val user = randomUser()
+        withUser(user, "test123") {
             sess.groups.new("test")
             try {
-                sess.groups.addRole("test", testUser.username, Role.DEVELOPER)
+                sess.groups.addRole("test", user.username, Role.DEVELOPER)
                 null
             } finally {
                 sess.groups.remove("test")
@@ -38,16 +40,17 @@ class GroupsTest : EndToEndTest() {
     @Test
     fun testGroupRoleActions() {
         val sess = adminSession()
+        val user = randomUser()
         var err = assertFailsWith<APIError> {
-            sess.groups.addRole("test", testUser.username, Role.MAINTAINER)
+            sess.groups.addRole("test", user.username, Role.MAINTAINER)
         }
         assertEquals(Status.BAD_REQUEST, err.resp.status)
-        withUser(testUser, "test123") {
-            withGroup("test", testUser.username) {
-                sess.groups.addRole("test", testUser.username, Role.MAINTAINER)
+        withUser(user, "test123") {
+            withGroup("test", user.username) {
+                sess.groups.addRole("test", user.username, Role.MAINTAINER)
                 // add same group twice
                 err = assertFailsWith<APIError> {
-                    sess.groups.addRole("test", testUser.username, Role.MAINTAINER)
+                    sess.groups.addRole("test", user.username, Role.MAINTAINER)
                 }
                 assertEquals(Status.CONFLICT, err.resp.status)
             }

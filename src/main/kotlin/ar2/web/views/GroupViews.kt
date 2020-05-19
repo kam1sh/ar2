@@ -2,6 +2,7 @@ package ar2.web.views
 
 import ar2.db.entities.Group
 import ar2.exceptions.*
+import ar2.exceptions.user.NoSuchUserException
 import ar2.services.GroupsService
 import ar2.services.UsersService
 import ar2.users.Role

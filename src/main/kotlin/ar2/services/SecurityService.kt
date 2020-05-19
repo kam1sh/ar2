@@ -9,4 +9,5 @@ interface SecurityService {
     fun requireSession(): Filter
     fun encode(password: String): String
     fun authenticate(creds: Credentials): User?
+    fun randomString(length: Int): String
 }

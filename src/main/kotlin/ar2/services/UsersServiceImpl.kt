@@ -4,8 +4,8 @@ import ar2.db.entities.User
 import ar2.db.pagedQuery
 import ar2.db.transaction
 import ar2.exceptions.IllegalActionException
-import ar2.exceptions.NoSuchUserException
-import ar2.exceptions.UserExistsException
+import ar2.exceptions.user.NoSuchUserException
+import ar2.exceptions.user.UserExistsException
 import ar2.web.PageRequest
 import java.time.LocalDateTime
 import org.hibernate.SessionFactory

@@ -1,25 +1,18 @@
-package ar2
+package ar2.tests
 
+import ar2.lib.session.adminSession
 import ar2.db.entities.User
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
 import ar2.lib.session.Session
+import ar2.services.SecurityService
 import ar2.services.UsersService
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
-import org.http4k.core.cookie.cookie
 import org.koin.core.KoinComponent
 import org.koin.core.get
-import org.koin.test.get
 import org.testng.annotations.Test
-
-val testUser = User(
-    username = "test",
-    email = "test@test",
-    name = "testuser",
-    isAdmin = false
-)
 
 class UserViewsTest : EndToEndTest() {
 
@@ -40,17 +33,6 @@ class UserViewsTest : EndToEndTest() {
 
         sess = adminSession()
         assertNotNull(sess.cookie)
-    }
-
-    @Test
-    fun testInvalidCookie() {
-        val sess = Session()
-        val request = sess.prepareRequest(Method.GET, "/api/v1/users/current")
-            .cookie(get<Config>().security.cookieName, "123")
-        val error = assertFailsWith<APIError> {
-            sess.request(request)
-        }
-        assertEquals(Status.UNAUTHORIZED, error.resp.status)
     }
 
     @Test
@@ -86,41 +68,49 @@ class UserViewsTest : EndToEndTest() {
         assertEquals(Status.NOT_FOUND, error.resp.status)
     }
 
-    // TODO implement random usernames in tests
-    // so we can test new/disable methods
-/*
     @Test
-    fun testCreateDeleteUser() {
+    fun testCreateDisableUser() {
         val sess = adminSession()
-        var resp = sess.users.new(testUser, "test123")
+        val user = randomUser()
+        var resp = sess.users.new(user, "test123")
         assertEquals(Status.CREATED, resp.status)
-        resp = sess.request(Method.POST, "/api/v1/users/username/${testUser.username}/disable")
+        resp = sess.request(Method.POST, "/api/v1/users/username/${user.username}/disable")
         assertEquals(Status.NO_CONTENT, resp.status)
     }
-*/
 
     @Test
     fun testNewUser() {
         val sess = adminSession()
-        withUser(testUser, "test123") {
+        withUser(null, "test123") {
             assertFailsWith<APIError> {
-                sess.users.new(testUser, "test456")
+                sess.users.new(it, "test456")
             }
-            val user = sess.users.find("test")
-            // may not be null if user was enabled instead of created
-//            assertNull(user.lastLogin)
-            val userSession = Session(Credentials(user.username, "test123"))
+            val found = sess.users.find(it.username)
+            assertNull(found.lastLogin)
+            val userSession = Session(Credentials(it.username, "test123"))
             userSession.login()
-            assertEquals(userSession.users.current().id, user.id)
+            assertEquals(userSession.users.current().id, found.id)
         }
     }
 }
 
-fun <T> KoinComponent.withUser(user: User, password: String, callable: () -> T): T {
+fun KoinComponent.randomUser(): User {
+    val securityService = get<SecurityService>()
+    val username = "test_" + securityService.randomString(20)
+    return User(
+        username = username,
+        email = "TEST@test.test",
+        name = "TESTING USER",
+        isAdmin = false
+    )
+}
+
+fun <T> KoinComponent.withUser(user: User?, password: String, callable: (User) -> T): T {
+    val user = user ?: randomUser()
     val service = get<UsersService>()
-    service.newOrEnable(user.copy(), password)
+    service.new(user.copy(), password)
     return try {
-        callable()
+        callable(user)
     } finally {
         val usr = service.find(user.username)
         service.disable(usr)

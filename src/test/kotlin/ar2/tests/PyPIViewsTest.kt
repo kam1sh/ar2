@@ -1,4 +1,4 @@
-package ar2
+package ar2.tests
 
 import kotlin.test.assertEquals
 import org.http4k.core.*

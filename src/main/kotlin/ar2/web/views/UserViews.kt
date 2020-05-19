@@ -3,7 +3,7 @@ package ar2.web.views
 import ar2.Config
 import ar2.db.entities.Session
 import ar2.db.entities.User
-import ar2.exceptions.NoSuchUserException
+import ar2.exceptions.user.NoSuchUserException
 import ar2.exceptions.WebError
 import ar2.facades.UsersFacade
 import ar2.services.SecurityService
