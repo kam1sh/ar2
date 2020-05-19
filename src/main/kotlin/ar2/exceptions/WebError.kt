@@ -3,7 +3,7 @@ package ar2.exceptions
 import org.http4k.core.*
 import org.http4k.format.Jackson.auto
 
-open class WebError : Ar2Exception {
+class WebError : Ar2Exception {
     private var status: Status
     private var msg: String
 
@@ -19,10 +19,10 @@ open class WebError : Ar2Exception {
         this.codeText = "NO_CODE_TEXT"
     }
 
-    constructor(err: WebError, status: Status) : super(err.msg, hideStackTrace = true) {
+    constructor(exc: Ar2Exception, status: Status) : super(exc.message ?: throw IllegalArgumentException(exc), hideStackTrace = true) {
         this.status = status
-        msg = err.msg
-        codeText = err.codeText
+        msg = exc.message!!
+        codeText = exc.codeText
     }
 
     data class WebErrorPayload(val message: String, val codeText: String)

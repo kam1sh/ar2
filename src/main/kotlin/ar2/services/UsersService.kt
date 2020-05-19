@@ -1,31 +1,25 @@
 package ar2.services
 
 import ar2.db.entities.User
-import ar2.exceptions.WebError
 import ar2.web.PageRequest
-import org.http4k.core.Status
-
-class UserExists : WebError(Status.CONFLICT, "User exists.", "USER_EXISTS")
-class UserDisabled : WebError(Status.BAD_REQUEST, "User exists, but disabled.", "USER EXISTS")
 
 interface UsersService {
     /**
      * Creates new user from request and password.
-     * @throws UserExists when user with such username already exists.
-     * @throws UserDisabled when user already exists, but disabled.
-     */
-    fun new(request: User, password: String, issuer: User): User
-
-    /**
-     * Creates new user without checking issuer for admin privs.
-     * Used by tests.
+     * @throws UserExistsException if user already exists
      */
     fun new(request: User, password: String): User
 
     /**
+     * Creates new user or enables back existing user
+     * with same username.
+     */
+    fun newOrEnable(request: User, password: String): User
+
+    /**
      * Lists all enabled users.
      */
-    fun list(pr: PageRequest): List<User>
+    fun find(pr: PageRequest): List<User>
 
     /**
      * Finds user (even disabled) by username.
@@ -41,6 +35,8 @@ interface UsersService {
      * Saves new user information.
      * @throws UserDisabled when user disabled.
      */
+    fun update(id: Int, form: User, password: String, issuer: User): User
+
     fun update(user: User)
 
     /**

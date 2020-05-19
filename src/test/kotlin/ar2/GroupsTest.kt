@@ -6,7 +6,6 @@ import ar2.services.UsersService
 import ar2.users.Role
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotEquals
 import org.http4k.core.Status
 import org.koin.core.KoinComponent
 import org.koin.core.get
@@ -50,7 +49,7 @@ class GroupsTest : EndToEndTest() {
                 err = assertFailsWith<APIError> {
                     sess.groups.addRole("test", testUser.username, Role.MAINTAINER)
                 }
-                assertNotEquals(Status.INTERNAL_SERVER_ERROR, err.resp.status)
+                assertEquals(Status.CONFLICT, err.resp.status)
             }
         }
     }

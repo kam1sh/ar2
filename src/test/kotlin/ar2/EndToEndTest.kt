@@ -36,7 +36,7 @@ open class EndToEndTest : KoinTest {
             name = "admin",
             isAdmin = true
         )
-        get<UsersService>().new(
+        get<UsersService>().newOrEnable(
             request = user,
             password = "test"
         )

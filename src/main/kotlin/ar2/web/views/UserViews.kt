@@ -38,23 +38,27 @@ class UserViews(
             "/" bind Method.POST to ::newUser,
             "/current" bind Method.GET to ::currentUser,
             "/id/{id}" bind Method.GET to ::findUserById,
+            "/id/{id}" bind Method.PUT to ::updateUserById,
             "/id/{id}/disable" bind Method.POST to ::disableUserById,
             "/username/{name}" bind Method.GET to ::findUserByUsername,
             "/username/{name}/disable" bind Method.POST to ::disableUserByName
         )
 
+    val userLens = Body.auto<User>().toLens()
+    val listUsersLens = Body.auto<List<User>>().toLens()
+
     private fun findUserByUsername(request: Request): Response {
         request.checkApiAcceptHeader()
         val username = request.path("name")!!
         val user = service.find(username).orNotFound()
-        return userResponseLens(user, Response(Status.OK))
+        return userLens(user, Response(Status.OK))
     }
 
     private fun findUserById(request: Request): Response {
         request.checkApiAcceptHeader()
-        val id = request.path("id")!!.toIntOrNull() ?: throw WebError(Status.BAD_REQUEST, "Invalid ID.")
+        val id = request.pathIntOrThrow("id")
         val user = service.find(id).orNotFound()
-        return userResponseLens(user, Response(Status.OK))
+        return userLens(user, Response(Status.OK))
     }
 
     data class AuthRequest(val username: String, val password: String)
@@ -84,33 +88,31 @@ class UserViews(
     }
 
     data class NewUserRequest(val user: User, val password: String)
-    val userLens = Body.auto<NewUserRequest>().toLens()
+    val newUserLens = Body.auto<NewUserRequest>().toLens()
 
     private fun newUser(request: Request): Response {
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
-        val form = userLens(request)
-        val user = service.new(form.user, form.password, request.currentUser)
+        val form = newUserLens(request)
+        val user = facade.new(form.user, form.password, request.currentUser)
         return Response(Status.CREATED).header("Location", "/users/id/${user.id}")
     }
 
-    val userResponseLens = Body.auto<User>().toLens()
     private fun currentUser(request: Request): Response {
         val body = request.currentUser
-        return userResponseLens(body, Response(Status.OK))
+        return userLens(body, Response(Status.OK))
     }
 
-    val listUsersLens = Body.auto<List<User>>().toLens()
     private fun listUsers(request: Request): Response {
         request.checkApiAcceptHeader()
         val pr = request.toPageRequest()
-        val users = service.list(pr)
+        val users = service.find(pr)
         return listUsersLens(users, Response(Status.OK))
     }
 
     private fun disableUserById(request: Request): Response {
         val id = try {
-            request.path("id")!!.toInt()
+            request.pathIntOrThrow("id")
         } catch (e: NumberFormatException) {
             return Response(Status.BAD_REQUEST)
         }
@@ -123,7 +125,17 @@ class UserViews(
         facade.disable(name, request.currentUser)
         return Response(Status.NO_CONTENT)
     }
+
+    private fun updateUserById(request: Request): Response {
+        val id = request.pathIntOrThrow("id")
+        val form = newUserLens(request)
+        service.update(id, form.user, form.password, request.currentUser)
+        return Response(Status.NO_CONTENT)
+    }
 }
 
-fun User?.orNotFound(): User = this ?: throw NoSuchUserException(Status.NOT_FOUND)
+fun User?.orNotFound(): User = this ?: throw NoSuchUserException()
 
+fun Request.pathIntOrThrow(name: String): Int {
+    return path(name)!!.toIntOrNull() ?: throw WebError(Status.BAD_REQUEST, "Invalid ID.", "INVALID_ID")
+}

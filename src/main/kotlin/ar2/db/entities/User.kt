@@ -2,11 +2,11 @@ package ar2.db.entities
 
 import ar2.exceptions.WebError
 import com.fasterxml.jackson.annotation.JsonIgnore
-import org.http4k.core.Status
 import java.time.LocalDateTime
 import javax.persistence.*
 import javax.persistence.Column
 import javax.persistence.Table
+import org.http4k.core.Status
 
 @Entity
 @Table(name = "users")

@@ -19,9 +19,11 @@ class SessionsServiceImpl : SessionsService, KoinComponent {
     }
 
     override fun findUser(cookieValue: String): User? {
-        return sessions.openSession().use {
+        val user = sessions.openSession().use {
             it.get(Session::class.java, cookieValue)?.user
         }
+        if (user?.disabled == true) return null
+        return user
     }
 
     override fun pruneOld(dt: LocalDateTime) {

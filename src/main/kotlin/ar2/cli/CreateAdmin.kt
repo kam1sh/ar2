@@ -2,7 +2,7 @@ package ar2.cli
 
 import ar2.App
 import ar2.db.entities.User
-import ar2.services.UserExists
+import ar2.exceptions.IllegalActionException
 import ar2.services.UsersService
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.parameters.options.default
@@ -25,14 +25,18 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
 
     override fun run() {
         try {
-            usersService.new(
+            usersService.newOrEnable(
                 User(
                     username = username,
                     email = email,
                     name = "Admin",
                     isAdmin = true
                 ), password)
-        } catch (exist: UserExists) {
+        } catch (exc: IllegalActionException) {
+            if (exc.code != "USER_EXISTS") {
+                log.error("Error creating admin:", exc)
+                return
+            }
             usersService.changePassword(username, password)
             log.warn("User {} already exists, changed password.", username)
             return

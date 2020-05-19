@@ -1,6 +1,7 @@
 package ar2.web.views
 
 import ar2.Config
+import ar2.exceptions.Ar2Exception
 import ar2.exceptions.WebError
 import ar2.services.SecurityService
 import java.nio.file.Files
@@ -69,4 +70,7 @@ class PyPIViews(private val securityService: SecurityService) : KoinComponent {
     }
 }
 
-class PackageExists : WebError(Status.CONFLICT, "Package already uploaded.")
+class PackageExists : Ar2Exception("Package already uploaded.", "PACKAGE_ALREADY_UPLOADED") {
+    override fun toHTTPResponse() =
+        WebError(this, Status.CONFLICT).toHTTPResponse()
+}
