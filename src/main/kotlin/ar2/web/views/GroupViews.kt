@@ -5,6 +5,7 @@ import ar2.exceptions.*
 import ar2.exceptions.user.NoSuchUserException
 import ar2.services.GroupsService
 import ar2.services.UsersService
+import ar2.services.extractUser
 import ar2.users.Role
 import ar2.web.*
 import org.http4k.core.*
@@ -43,7 +44,7 @@ class GroupViews(
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
         val groupForm = groupLens(request)
-        service.new(groupForm.name, request.currentUser)
+        service.new(groupForm.name, extractUser(request))
         return Response(Status.CREATED)
     }
 

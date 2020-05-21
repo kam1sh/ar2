@@ -4,15 +4,20 @@ import ar2.lib.session.APIError
 import ar2.lib.session.adminSession
 import ar2.services.GroupsService
 import ar2.services.UsersService
+import ar2.tests.users.randomUser
+import ar2.tests.users.withUser
 import ar2.users.Role
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.http4k.core.Status
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.KoinComponent
 import org.koin.core.get
-import org.testng.annotations.Test
+import org.koin.test.KoinTest
 
-class GroupsTest : EndToEndTest() {
+@ExtendWith(EndToEndTest::class)
+class GroupsTest : KoinTest {
     @Test
     fun testCreateRemoveGroup() {
         val sess = adminSession()

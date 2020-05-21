@@ -1,8 +1,7 @@
 package ar2.services
 
 import ar2.db.entities.User
-import ar2.web.currentUser
-import ar2.web.userKey
+import ar2.exceptions.user.NoSuchUserException
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
 import java.util.concurrent.ThreadLocalRandom
@@ -20,6 +19,7 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
     val log = LoggerFactory.getLogger(SecurityServiceImpl::class.java)
 
     private val usersService: UsersService by inject()
+    private val sessionsService: SessionsService by inject()
 
     private val bCrypt = BCrypt.with(LongPasswordStrategies.hashSha512(BCRYPT_VERSION))
     private val verifier = BCrypt.verifyer(
@@ -29,12 +29,12 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
     private val random get() = ThreadLocalRandom.current()
 
     override fun basicAuth() = ServerFilters.BasicAuth(
-            "ar2 authentication", key = userKey, lookup = ::authenticate
+            "ar2 authentication", key = contextKey, lookup = ::authenticate
     )
 
     override fun requireSession() = Filter { next ->
         { request ->
-            val usr = request.currentUser
+            val usr = extractUser(request)
             log.trace("Current user: {}", usr)
             next(request)
         }
@@ -43,7 +43,11 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
     override fun encode(password: String): String = bCrypt.hashToString(ITERATIONS, password.toCharArray())
 
     override fun authenticate(creds: Credentials): User? {
-        val user = usersService.find(creds.user)
+        val user = try {
+            usersService.find(creds.user)
+        } catch (exc: NoSuchUserException) {
+            return null
+        }
         if (user.disabled) return null
         val result = verifier.verify(creds.password.toCharArray(), user.passwordHash!!.toCharArray()).verified
         return if (result) user else null

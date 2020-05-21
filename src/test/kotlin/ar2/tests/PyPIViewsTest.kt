@@ -1,12 +1,16 @@
 package ar2.tests
 
+import ar2.web.WebHandler
 import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.koin.test.KoinTest
 import org.koin.test.get
-import org.testng.annotations.Test
 
-class PyPIViewsTest : EndToEndTest() {
+@ExtendWith(EndToEndTest::class)
+class PyPIViewsTest : KoinTest {
 
     @Test
     fun testUpload() {
@@ -37,7 +41,7 @@ class PyPIViewsTest : EndToEndTest() {
                 .header("Authorization", "Basic dGVzdGFkbWluOnRlc3Q=")
                 .header("content-type", "multipart/form-data; boundary=${body.boundary}")
                 .body(body)
-        val resp = get<HttpHandler>()(request)
+        val resp = get<WebHandler>()(request)
         assertEquals(Status.CREATED, resp.status)
     }
 }

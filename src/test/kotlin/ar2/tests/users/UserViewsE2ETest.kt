@@ -1,4 +1,4 @@
-package ar2.tests
+package ar2.tests.users
 
 import ar2.db.entities.User
 import ar2.lib.session.APIError
@@ -7,14 +7,17 @@ import ar2.lib.session.Session
 import ar2.lib.session.adminSession
 import ar2.services.SecurityService
 import ar2.services.UsersService
+import ar2.tests.EndToEndTest
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
-import org.koin.core.KoinComponent
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.get
-import org.testng.annotations.Test
+import org.koin.test.KoinTest
 
-class UserViewsTest : EndToEndTest() {
+@ExtendWith(EndToEndTest::class)
+class UserViewsE2ETest : KoinTest {
 
     @Test
     fun testCurrentWithNoSession() {
@@ -22,17 +25,6 @@ class UserViewsTest : EndToEndTest() {
         assertFailsWith<APIError> {
             sess.users.current()
         }
-    }
-
-    @Test
-    fun testLogin() {
-        var sess = Session(Credentials("", ""))
-        assertFailsWith<APIError>("Login with invalid credentials did not returned error!") {
-            sess.login()
-        }
-
-        sess = adminSession()
-        assertNotNull(sess.cookie)
     }
 
     @Test
@@ -94,7 +86,7 @@ class UserViewsTest : EndToEndTest() {
     }
 }
 
-fun KoinComponent.randomUser(): User {
+fun KoinTest.randomUser(): User {
     val securityService = get<SecurityService>()
     val username = "test_" + securityService.randomString(20)
     return User(
@@ -105,14 +97,14 @@ fun KoinComponent.randomUser(): User {
     )
 }
 
-fun <T> KoinComponent.withUser(user: User?, password: String, callable: (User) -> T): T {
-    val user = user ?: randomUser()
+fun <T> KoinTest.withUser(user: User?, password: String, callable: (User) -> T): T {
+    val userOrRand = user ?: randomUser()
     val service = get<UsersService>()
-    service.new(user.copy(), password)
+    service.new(userOrRand.copy(), password)
     return try {
-        callable(user)
+        callable(userOrRand)
     } finally {
-        val usr = service.find(user.username)
+        val usr = service.find(userOrRand.username)
         service.disable(usr)
     }
 }
