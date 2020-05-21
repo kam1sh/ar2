@@ -2,19 +2,25 @@ package ar2.tests
 
 import ar2.Config
 import ar2.lib.session.APIError
+import ar2.lib.session.Credentials
 import ar2.lib.session.Session
+import ar2.lib.session.adminSession
 import ar2.services.SecurityService
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.cookie.cookie
+import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
+import org.koin.test.KoinTest
 import org.koin.test.get
 import org.koin.test.inject
-import org.testng.annotations.Test
 
-class AppTest : EndToEndTest() {
+@ExtendWith(EndToEndTest::class)
+class AppTest : KoinTest {
     private val securityService: SecurityService by inject()
 
     @Test
@@ -34,5 +40,17 @@ class AppTest : EndToEndTest() {
             sess.request(request)
         }
         assertEquals(Status.UNAUTHORIZED, error.resp.status)
+    }
+
+    @Test
+    fun testLogin() {
+        var sess = Session(Credentials("", ""))
+        val error = assertFailsWith<APIError>("Login with invalid credentials did not returned error!") {
+            sess.login()
+        }
+        assertEquals(Status.BAD_REQUEST, error.resp.status)
+
+        sess = adminSession()
+        assertNotNull(sess.cookie)
     }
 }

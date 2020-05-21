@@ -1,6 +1,7 @@
 package ar2.lib.session
 
 import ar2.Config
+import ar2.web.WebHandler
 import ar2.web.views.AuthenticationViews
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
@@ -54,7 +55,7 @@ class Session(val creds: Credentials? = null) : KoinComponent {
     }
 
     fun request(reqObject: Request): Response {
-        val handler = get<HttpHandler>()
+        val handler = get<WebHandler>()
         val resp = handler(reqObject)
         if (resp.status.code !in 200..399) throw APIError(resp)
         return resp

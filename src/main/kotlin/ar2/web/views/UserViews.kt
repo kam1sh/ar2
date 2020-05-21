@@ -4,6 +4,7 @@ import ar2.db.entities.User
 import ar2.exceptions.WebError
 import ar2.exceptions.user.NoSuchUserException
 import ar2.facades.UsersFacade
+import ar2.services.extractUser
 import ar2.web.*
 import org.http4k.core.*
 import org.http4k.format.Jackson.auto
@@ -51,12 +52,12 @@ class UserViews(
         request.checkApiAcceptHeader()
         request.checkApiCTHeader()
         val form = newUserLens(request)
-        val user = facade.new(form.user, form.password, request.currentUser)
+        val user = facade.new(form.user, form.password, extractUser(request))
         return Response(Status.CREATED).header("Location", "/users/id/${user.id}")
     }
 
     private fun currentUser(request: Request): Response {
-        val body = request.currentUser
+        val body = extractUser(request)
         return userLens(body, Response(Status.OK))
     }
 
@@ -69,20 +70,20 @@ class UserViews(
 
     private fun disableUserById(request: Request): Response {
         val id = request.pathIntOrThrow("id")
-        facade.disable(id, request.currentUser)
+        facade.disable(id, extractUser(request))
         return Response(Status.NO_CONTENT)
     }
 
     private fun disableUserByName(request: Request): Response {
         val name = request.path("name")!!
-        facade.disable(name, request.currentUser)
+        facade.disable(name, extractUser(request))
         return Response(Status.NO_CONTENT)
     }
 
     private fun updateUserById(request: Request): Response {
         val id = request.pathIntOrThrow("id")
         val form = newUserLens(request)
-        facade.update(id, form.user, form.password, request.currentUser)
+        facade.update(id, form.user, form.password, extractUser(request))
         return Response(Status.NO_CONTENT)
     }
 }
