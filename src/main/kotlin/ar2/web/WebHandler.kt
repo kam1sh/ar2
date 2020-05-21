@@ -2,6 +2,7 @@ package ar2.web
 
 import ar2.App
 import ar2.services.SecurityService
+import ar2.web.views.AuthenticationViews
 import ar2.web.views.GroupViews
 import ar2.web.views.PyPIViews
 import ar2.web.views.UserViews
@@ -17,6 +18,7 @@ import org.koin.core.get
 
 class WebHandler : KoinComponent {
 
+    private val authenticationViews: AuthenticationViews = get()
     private val userViews: UserViews = get()
     private val groupViews: GroupViews = get()
     private val pyPIViews: PyPIViews = get()
@@ -29,7 +31,7 @@ class WebHandler : KoinComponent {
             .then(
                 routes("/api" bind apiRoutes()))
     fun apiRoutes() = routes(
-        "/v1/login" bind Method.POST to userViews::authenticateByCredentials,
+        "/v1/login" bind Method.POST to authenticationViews::authenticateByCredentials,
         "/v1/users" bind securityService.requireSession().then(userViews.views()),
         "/v1/groups" bind securityService.requireSession().then(groupViews.views()),
         "/py/{group}/{repo}" bind pyPIViews.views()

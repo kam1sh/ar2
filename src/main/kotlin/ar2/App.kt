@@ -7,6 +7,7 @@ import ar2.db.doConnectToDatabase
 import ar2.facades.UsersFacade
 import ar2.facades.UsersFacadeImpl
 import ar2.services.*
+import ar2.web.views.AuthenticationViews
 import ar2.web.views.GroupViews
 import ar2.web.views.PyPIViews
 import ar2.web.views.UserViews
@@ -35,7 +36,8 @@ val modules = module {
 
     single { UsersFacadeImpl(get()) as UsersFacade }
 
-    single { UserViews(get(), get(), get()) }
+    single { AuthenticationViews(get(), get()) }
+    single { UserViews(get()) }
     single { PyPIViews(get()) }
     single { GroupViews(get(), get()) }
 }

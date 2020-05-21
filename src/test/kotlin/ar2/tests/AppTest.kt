@@ -4,15 +4,15 @@ import ar2.Config
 import ar2.lib.session.APIError
 import ar2.lib.session.Session
 import ar2.services.SecurityService
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertTrue
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.cookie.cookie
 import org.koin.test.get
 import org.koin.test.inject
 import org.testng.annotations.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertTrue
 
 class AppTest : EndToEndTest() {
     private val securityService: SecurityService by inject()
@@ -35,6 +35,4 @@ class AppTest : EndToEndTest() {
         }
         assertEquals(Status.UNAUTHORIZED, error.resp.status)
     }
-
-
 }

@@ -1,18 +1,17 @@
 package ar2.services
 
 import ar2.db.entities.User
-import ar2.exceptions.WebError
 import ar2.web.currentUser
 import ar2.web.userKey
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
+import java.util.concurrent.ThreadLocalRandom
 import org.http4k.core.*
 import org.http4k.core.Credentials
 import org.http4k.filter.ServerFilters
 import org.koin.core.KoinComponent
 import org.koin.core.inject
 import org.slf4j.LoggerFactory
-import java.util.concurrent.ThreadLocalRandom
 
 const val ITERATIONS = 6
 val BCRYPT_VERSION: BCrypt.Version = BCrypt.Version.VERSION_2B

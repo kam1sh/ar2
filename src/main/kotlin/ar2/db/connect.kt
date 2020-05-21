@@ -20,7 +20,7 @@ fun doConnectToDatabase(config: PostgresSettings, showSql: Boolean = false): Ses
         .locations("classpath:flyway")
         .load()
     val count = migrator.migrate()
-    log.info("{} migrations applied.", count)
+    if (count > 0) log.info("{} migrations applied.", count)
     val props = Properties()
     props["hibernate.connection.provider_class"] = "org.hibernate.hikaricp.internal.HikariCPConnectionProvider"
     props["hibernate.hikari.dataSourceClassName"] = "org.postgresql.ds.PGSimpleDataSource"

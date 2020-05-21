@@ -1,8 +1,8 @@
 package ar2.exceptions
 
+import java.lang.Exception
 import org.http4k.core.Body
 import org.http4k.core.Response
-import java.lang.Exception
 import org.http4k.core.Status
 import org.http4k.format.Jackson.auto
 

@@ -1,10 +1,9 @@
 package ar2.lib.session
 
-import ar2.lib.session.Credentials
-import ar2.lib.session.Session
+val adminCredentials = Credentials("testadmin", "test")
 
 fun adminSession(): Session {
-    val sess = Session(Credentials("testadmin", "test"))
+    val sess = Session(adminCredentials)
     sess.login()
     return sess
 }

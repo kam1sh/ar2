@@ -1,7 +1,7 @@
 package ar2.lib.session
 
 import ar2.Config
-import ar2.web.views.UserViews
+import ar2.web.views.AuthenticationViews
 import com.fasterxml.jackson.core.JsonFactory
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -31,7 +31,7 @@ class Session(val creds: Credentials? = null) : KoinComponent {
 
     fun login() {
         if (creds == null) throw NullPointerException("No credentials provided.")
-        val resp = request(Method.POST, "/api/v1/login", UserViews.AuthRequest(creds.username, creds.password))
+        val resp = request(Method.POST, "/api/v1/login", AuthenticationViews.AuthRequest(creds.username, creds.password))
         cookie = resp.cookies().find { it.name == cfg.security.cookieName }
     }
 

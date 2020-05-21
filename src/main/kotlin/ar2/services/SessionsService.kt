@@ -5,6 +5,10 @@ import ar2.db.entities.User
 import java.time.LocalDateTime
 
 interface SessionsService {
+    /**
+     * @return cookie value
+     */
+    fun new(user: User): Session
     fun new(session: Session)
     fun findUser(cookieValue: String): User?
     fun pruneOld(dt: LocalDateTime)
