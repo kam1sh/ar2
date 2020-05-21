@@ -4,6 +4,7 @@ import ar2.Config
 import ar2.db.entities.Session
 import ar2.db.entities.User
 import ar2.db.transaction
+import ar2.exceptions.UnauthorizedException
 import ar2.exceptions.WebError
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
@@ -35,7 +36,7 @@ class SessionsServiceImpl : SessionsService, KoinComponent {
     }
 
     override fun findUser(request: Request): User {
-        return contextKey[request] ?: throw WebError(Status.UNAUTHORIZED, "Not authorised.", "UNAUTHORISED")
+        return contextKey[request] ?: throw UnauthorizedException()
     }
 
     override fun new(user: User): Session {

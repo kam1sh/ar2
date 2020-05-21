@@ -2,6 +2,8 @@ package ar2.tests.users
 
 import ar2.App
 import ar2.db.entities.User
+import ar2.exceptions.UnauthorizedException
+import ar2.exceptions.WebError
 import ar2.facades.UsersFacade
 import ar2.lib.session.Session
 import ar2.lib.session.deserialize
@@ -27,11 +29,12 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.koin.core.context.*
+import org.koin.core.get
 import org.koin.dsl.module
 import org.koin.test.KoinTest
 import org.koin.test.get
+import kotlin.test.assertFailsWith
 
-@Disabled
 class UserViewsTest : KoinTest {
 
     @Suppress("USELESS_CAST")
@@ -42,7 +45,7 @@ class UserViewsTest : KoinTest {
             single { facade }
             single { UserViews(facade) }
             single { mockk<SecurityService>() }
-            single { spyk<SessionsServiceImpl>() as SessionsService }
+            single { mockk<SessionsService>() }
         }
         startKoin { modules(module) }
         val app = App()
@@ -57,6 +60,7 @@ class UserViewsTest : KoinTest {
         setup(facade)
         return get<UserViews>().views()
     }
+
     @Test
     fun testList() {
         val pr = PageRequest(offset = 0, limit = 10)
@@ -88,16 +92,15 @@ class UserViewsTest : KoinTest {
         val request = Session().prepareRequest(Method.POST, "/", UserViews.NewUserRequest(user, "123"))
         val sessionsService = get<SessionsService>()
         every { sessionsService.findUser(any() as Request) } returns issuer
-        val response = get<WebHandler>()(request)
+        val response = views(request)
         assertEquals(Status.CREATED, response.status)
     }
 
     @Test
     fun testCurrentWithNoSession() {
-        val views = mockViews {}
-        val handler = get<WebHandler>().toHttpHandler(views)
-        val resp = handler(Request(Method.GET, "/current"))
-        assertEquals(Status.UNAUTHORIZED, resp.status)
+        val handler = mockViews {}
+        every { get<SessionsService>().findUser(any() as Request) } throws UnauthorizedException()
+        assertFailsWith<UnauthorizedException> { handler(Request(Method.GET, "/current")) }
     }
 
     @AfterEach
