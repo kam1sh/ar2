@@ -1,6 +1,5 @@
 package ar2.web
 
-import ar2.App
 import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.contexts

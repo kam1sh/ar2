@@ -1,4 +1,4 @@
-package ar2.tests
+package ar2.tests.e2e
 
 import ar2.App
 import ar2.db.entities.User
@@ -15,7 +15,6 @@ import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
 import org.koin.core.context.stopKoin
 import org.koin.core.get
-import org.koin.test.KoinTest
 import org.slf4j.LoggerFactory
 
 class EndToEndTest : KoinComponent, BeforeAllCallback, AfterAllCallback {

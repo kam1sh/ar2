@@ -4,8 +4,6 @@ import ar2.db.entities.Session
 import ar2.db.entities.User
 import java.time.LocalDateTime
 import org.http4k.core.Request
-import org.http4k.core.RequestContexts
-import org.http4k.lens.BiDiLens
 import org.koin.core.KoinComponent
 import org.koin.core.get
 

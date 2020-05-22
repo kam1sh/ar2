@@ -1,4 +1,4 @@
-package ar2.tests
+package ar2.tests.e2e
 
 import ar2.web.WebHandler
 import kotlin.test.assertEquals

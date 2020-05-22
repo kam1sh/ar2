@@ -1,11 +1,9 @@
-package ar2.tests
+package ar2.tests.e2e
 
 import ar2.lib.session.APIError
 import ar2.lib.session.adminSession
 import ar2.services.GroupsService
 import ar2.services.UsersService
-import ar2.tests.users.randomUser
-import ar2.tests.users.withUser
 import ar2.users.Role
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith

@@ -5,15 +5,12 @@ import ar2.db.entities.Session
 import ar2.db.entities.User
 import ar2.db.transaction
 import ar2.exceptions.UnauthorizedException
-import ar2.exceptions.WebError
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 import org.hibernate.SessionFactory
 import org.http4k.base64Encode
 import org.http4k.core.Request
-import org.http4k.core.RequestContext
 import org.http4k.core.RequestContexts
-import org.http4k.core.Status
 import org.http4k.core.cookie.cookie
 import org.http4k.lens.RequestContextKey
 import org.koin.core.KoinComponent
