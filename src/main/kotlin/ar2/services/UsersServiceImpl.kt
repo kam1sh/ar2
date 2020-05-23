@@ -1,10 +1,12 @@
 package ar2.services
 
 import ar2.db.entities.User
+import ar2.db.entities.assertAdmin
 import ar2.db.pagedQuery
 import ar2.db.transaction
 import ar2.exceptions.IllegalActionException
 import ar2.exceptions.user.NoSuchUserException
+import ar2.exceptions.user.UserDisabledException
 import ar2.exceptions.user.UserExistsException
 import ar2.web.PageRequest
 import java.time.LocalDateTime
@@ -16,14 +18,19 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
 
     private val factory: SessionFactory by inject()
 
-    override fun new(request: User, password: String): User {
+    override fun new(form: User, password: String, issuer: User): User {
+        issuer.assertAdmin()
+        return new(form, password)
+    }
+
+    override fun new(form: User, password: String): User {
         // firstly try to find existing user
         try {
-            val user = find(request.username)
+            val user = find(form.username)
             throw UserExistsException(user)
         } catch (ignored: NoSuchUserException) {}
         // and then create new user
-        val user = request.copy(
+        val user = form.copy(
             id = null,
             passwordHash = securityService.encode(password),
             createdOn = LocalDateTime.now(),
@@ -62,13 +69,14 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
 
     override fun update(id: Int, form: User, password: String, issuer: User): User {
         // if issuer is not admin or updates not the same user, then throw an exception
-        if (!issuer.isAdmin || issuer.id != id)
+        if (!issuer.isAdmin && issuer.id != id)
             throw IllegalActionException("Not enough privileges to change other users.", "NO_PRIVILEGES")
         val user = find(id).apply {
             name = form.name
             email = form.name
             passwordHash = securityService.encode(password)
         }
+        if(user.disabled) throw UserDisabledException()
         forceUpdate(user)
         return user
     }
@@ -79,7 +87,11 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         it.update(user)
     }
 
-    override fun disable(user: User) {
+    override fun disable(user: User, issuer: User?) {
+        issuer?.let {
+            it.assertAdmin()
+            if (issuer.id == user.id) throw IllegalActionException("You cannot disable yourself.", "CANNOT_DISABLE_YOURSELF")
+        }
         user.disabled = true
         forceUpdate(user)
     }

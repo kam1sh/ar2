@@ -12,8 +12,7 @@ class UsersFacadeImpl(
 ) : UsersFacade, KoinComponent {
 
     override fun new(form: User, password: String, issuer: User): User {
-        issuer.assertAdmin()
-        return service.new(form, password)
+        return service.new(form, password, issuer)
     }
 
     override fun find(username: String) = service.find(username)
@@ -25,26 +24,21 @@ class UsersFacadeImpl(
     }
 
     override fun disable(userId: Int, issuer: User) {
-        issuer.assertAdmin()
         val user = service.find(userId)
-        doDisable(user, issuer)
+        service.disable(user, issuer)
     }
 
     override fun disable(username: String, issuer: User) {
-        issuer.assertAdmin()
         val user = service.find(username)
-        doDisable(user, issuer)
+        service.disable(user, issuer)
     }
 
+/*
     override fun disable(username: String) {
         val user = service.find(username)
-        service.disable(user)
+        service.disable(user, null)
     }
-
-    private fun doDisable(user: User, issuer: User) {
-        if (issuer.id == user.id) throw IllegalActionException("You cannot disable yourself.", "CANNOT_DISABLE_YOURSELF")
-        service.disable(user)
-    }
+*/
 
     override fun enable(username: String, issuer: User) {
         issuer.assertAdmin()

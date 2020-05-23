@@ -15,7 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.get
 import org.koin.test.KoinTest
 
-@ExtendWith(EndToEndTest::class)
+@ExtendWith(EndToEndTestExt::class)
 class UserViewsE2ETest : KoinTest {
 
     @Test
@@ -104,6 +104,6 @@ fun <T> KoinTest.withUser(user: User?, password: String, callable: (User) -> T):
         callable(userOrRand)
     } finally {
         val usr = service.find(userOrRand.username)
-        service.disable(usr)
+        service.disable(usr, null)
     }
 }

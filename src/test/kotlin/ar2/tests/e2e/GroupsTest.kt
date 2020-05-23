@@ -14,7 +14,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.koin.test.KoinTest
 
-@ExtendWith(EndToEndTest::class)
+@ExtendWith(EndToEndTestExt::class)
 class GroupsTest : KoinTest {
     @Test
     fun testCreateRemoveGroup() {

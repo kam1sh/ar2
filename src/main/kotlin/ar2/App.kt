@@ -69,8 +69,8 @@ class App : KoinComponent, AutoCloseable {
     /**
      * Setups everything needed to run application. Logging, config, database, etc.
      */
-    fun setup(configFile: File, logLevel: Level = Level.INFO) {
-        loadConfig(configFile)
+    fun setup(configFile: File?, logLevel: Level = Level.INFO) {
+        loadConfig(configFile ?: File("ar2.yaml"))
         setupLogging(logLevel)
         val factory = connectToDatabase(showSql = logLevel == Level.TRACE)
         getKoin().declare(factory)

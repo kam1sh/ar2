@@ -13,6 +13,5 @@ interface UsersFacade {
 
     fun disable(userId: Int, issuer: User)
     fun disable(username: String, issuer: User)
-    fun disable(username: String)
     fun enable(username: String, issuer: User)
 }

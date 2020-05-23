@@ -19,7 +19,7 @@ import org.koin.test.KoinTest
 import org.koin.test.get
 import org.koin.test.inject
 
-@ExtendWith(EndToEndTest::class)
+@ExtendWith(EndToEndTestExt::class)
 class AppTest : KoinTest {
     private val securityService: SecurityService by inject()
 

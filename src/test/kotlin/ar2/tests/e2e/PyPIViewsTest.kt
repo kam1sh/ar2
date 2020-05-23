@@ -9,7 +9,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-@ExtendWith(EndToEndTest::class)
+@ExtendWith(EndToEndTestExt::class)
 class PyPIViewsTest : KoinTest {
 
     @Test

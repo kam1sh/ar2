@@ -33,7 +33,7 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
                     isAdmin = true
                 ), password)
         } catch (exc: IllegalActionException) {
-            if (exc.code != "USER_EXISTS") {
+            if (exc.codeText != "USER_EXISTS") {
                 log.error("Error creating admin:", exc)
                 return
             }
