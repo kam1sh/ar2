@@ -51,9 +51,10 @@ class App : KoinComponent, AutoCloseable {
     lateinit var config: Config
     lateinit var sessionFactory: SessionFactory
 
-    fun loadConfig(file: File) {
-        log.info("Using configuration file {}", file.name)
-        config = file.toConfig()
+    fun loadConfig(file: File?) {
+        val fileOrDef = file ?: File("ar2.yaml")
+        log.info("Using configuration file {}", fileOrDef.name)
+        config = fileOrDef.toConfig()
         getKoin().declare(config)
     }
 
@@ -70,7 +71,7 @@ class App : KoinComponent, AutoCloseable {
      * Setups everything needed to run application. Logging, config, database, etc.
      */
     fun setup(configFile: File?, logLevel: Level = Level.INFO) {
-        loadConfig(configFile ?: File("ar2.yaml"))
+        loadConfig(configFile)
         setupLogging(logLevel)
         val factory = connectToDatabase(showSql = logLevel == Level.TRACE)
         getKoin().declare(factory)

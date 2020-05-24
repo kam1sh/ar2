@@ -1,12 +1,11 @@
 package ar2.db.entities
 
-import ar2.exceptions.WebError
+import ar2.exceptions.NoPermissionException
 import com.fasterxml.jackson.annotation.JsonIgnore
 import java.time.LocalDateTime
 import javax.persistence.*
 import javax.persistence.Column
 import javax.persistence.Table
-import org.http4k.core.Status
 
 @Entity
 @Table(name = "users")
@@ -42,8 +41,7 @@ data class User(
 )
 
 fun User.assertAdmin(msg: String? = null) {
-    if (!isAdmin) throw WebError(
-        Status.FORBIDDEN,
+    if (!isAdmin) throw NoPermissionException(
         msg ?: "You don't have permission to do this."
     )
 }

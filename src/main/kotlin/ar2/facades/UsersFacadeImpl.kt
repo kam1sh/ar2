@@ -1,8 +1,6 @@
 package ar2.facades
 
 import ar2.db.entities.User
-import ar2.db.entities.assertAdmin
-import ar2.exceptions.IllegalActionException
 import ar2.services.UsersService
 import ar2.web.PageRequest
 import org.koin.core.KoinComponent
@@ -33,16 +31,8 @@ class UsersFacadeImpl(
         service.disable(user, issuer)
     }
 
-/*
-    override fun disable(username: String) {
-        val user = service.find(username)
-        service.disable(user, null)
-    }
-*/
-
     override fun enable(username: String, issuer: User) {
-        issuer.assertAdmin()
         val user = service.find(username)
-        service.enable(user)
+        service.enable(user, issuer)
     }
 }

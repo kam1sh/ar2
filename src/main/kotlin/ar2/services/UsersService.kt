@@ -52,7 +52,7 @@ interface UsersService {
     /**
      * Enables back user by its username.
      */
-    fun enable(user: User)
+    fun enable(user: User, issuer: User?)
 
     fun changePassword(username: String, password: String)
 }

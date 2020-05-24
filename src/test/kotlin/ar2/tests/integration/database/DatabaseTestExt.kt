@@ -6,7 +6,6 @@ import ar2.services.SecurityService
 import ar2.services.SecurityServiceImpl
 import ch.qos.logback.classic.Level
 import io.mockk.spyk
-import java.io.File
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -28,7 +27,7 @@ class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, AfterAllCallback,
         startKoin { modules(module {
             single { spyk(SecurityServiceImpl() as SecurityService) }
         }) }
-        app.loadConfig(File("ar2.yaml"))
+        app.loadConfig(null)
         val factory = app.connectToDatabase(showSql = true)
         getKoin().declare(factory)
     }

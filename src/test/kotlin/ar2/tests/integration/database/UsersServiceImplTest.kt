@@ -1,6 +1,7 @@
 package ar2.tests.integration.database
 
 import ar2.exceptions.IllegalActionException
+import ar2.exceptions.NoPermissionException
 import ar2.exceptions.user.UserExistsException
 import ar2.services.SecurityService
 import ar2.services.UsersService
@@ -9,11 +10,12 @@ import ar2.tests.e2e.randomUser
 import ar2.web.PageRequest
 import io.mockk.every
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
+import kotlin.test.assertTrue
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.get
 import org.koin.test.KoinTest
-import kotlin.test.assertNotEquals
 
 @ExtendWith(DatabaseTestExt::class)
 class UsersServiceImplTest : KoinTest {
@@ -24,7 +26,6 @@ class UsersServiceImplTest : KoinTest {
     fun before() {
         service = UsersServiceImpl(get())
         every { get<SecurityService>().encode("TEST") } returns "TEST"
-
     }
 
     @Test
@@ -88,7 +89,7 @@ class UsersServiceImplTest : KoinTest {
     }
 
     @Test
-    fun testUpdatePermissions() {
+    fun testUpdateFromAdmin() {
         val user = randomUser()
         val id = service.new(user, "TEST").id!!
         val form = randomUser()
@@ -98,5 +99,31 @@ class UsersServiceImplTest : KoinTest {
         assertThrows<IllegalActionException> { service.update(id, form, "TEST", issuer) }
         issuer.isAdmin = true
         service.update(id, form, "TEST", issuer)
+    }
+
+    @Test
+    fun testDisable() {
+        var user = randomUser()
+        val issuer = randomUser()
+        issuer.isAdmin = true
+        user = service.new(user, "TEST", issuer)
+        issuer.isAdmin = false
+        assertThrows<NoPermissionException> { service.disable(user, issuer) }
+        issuer.isAdmin = true
+        service.disable(user, issuer)
+        user = service.find(user.id!!)
+        assertTrue(user.disabled)
+    }
+
+    @Test
+    fun testEnable() {
+        var user = randomUser()
+        val issuer = randomUser()
+        issuer.isAdmin = true
+        user = service.new(user, "TEST", issuer)
+        service.disable(user, issuer)
+        service.enable(user, issuer)
+        user = service.find(user.id!!)
+        assertTrue(!user.disabled)
     }
 }

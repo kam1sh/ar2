@@ -2,11 +2,9 @@ package ar2.tests.e2e
 
 import ar2.App
 import ar2.db.entities.User
-import ar2.facades.UsersFacade
 import ar2.lib.cleanAll
 import ar2.services.UsersService
 import ch.qos.logback.classic.Level
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import org.hibernate.SessionFactory
@@ -42,8 +40,8 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback, Af
 
     override fun beforeEach(context: ExtensionContext?) {
         get<SessionFactory>().cleanAll()
-        get<UsersService>().newOrEnable(
-            request = adminUser,
+        get<UsersService>().new(
+            form = adminUser,
             password = "test"
         )
     }

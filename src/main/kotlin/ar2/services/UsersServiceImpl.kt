@@ -45,7 +45,7 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         return try {
             new(request, password)
         } catch (exists: UserExistsException) {
-            enable(exists.user)
+            enable(exists.user, null)
             exists.user
         }
     }
@@ -76,27 +76,28 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
             email = form.name
             passwordHash = securityService.encode(password)
         }
-        if(user.disabled) throw UserDisabledException()
+        if (user.disabled) throw UserDisabledException()
         forceUpdate(user)
         return user
     }
 
     override fun update(user: User) = forceUpdate(user)
 
-    fun forceUpdate(user: User) = transaction {
+    private fun forceUpdate(user: User) = transaction {
         it.update(user)
     }
 
     override fun disable(user: User, issuer: User?) {
         issuer?.let {
             it.assertAdmin()
-            if (issuer.id == user.id) throw IllegalActionException("You cannot disable yourself.", "CANNOT_DISABLE_YOURSELF")
+            if (it.id == user.id) throw IllegalActionException("You cannot disable yourself.", "CANNOT_DISABLE_YOURSELF")
         }
         user.disabled = true
         forceUpdate(user)
     }
 
-    override fun enable(user: User) {
+    override fun enable(user: User, issuer: User?) {
+        issuer?.assertAdmin()
         user.disabled = false
         forceUpdate(user)
     }
