@@ -24,6 +24,7 @@ import java.nio.file.Paths
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent
 import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
 import org.koin.dsl.module
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -71,6 +72,7 @@ class App : KoinComponent, AutoCloseable {
      * Setups everything needed to run application. Logging, config, database, etc.
      */
     fun setup(configFile: File?, logLevel: Level = Level.INFO) {
+        startKoin { modules(modules) }
         loadConfig(configFile)
         setupLogging(logLevel)
         val factory = connectToDatabase(showSql = logLevel == Level.TRACE)
@@ -79,6 +81,7 @@ class App : KoinComponent, AutoCloseable {
 
     override fun close() {
         if (::sessionFactory.isInitialized) sessionFactory.close()
+        stopKoin()
     }
 }
 
@@ -95,7 +98,6 @@ class CliApp(val app: App) : CliktCommand() {
 }
 
 fun main(args: Array<String>) {
-    startKoin { modules(modules) }
     App().use {
         CliApp(it)
             .subcommands(Serve(it), CreateAdmin(it), Maintenance(it))

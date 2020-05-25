@@ -18,7 +18,7 @@ import org.koin.core.context.stopKoin
 import org.koin.core.get
 import org.slf4j.LoggerFactory
 
-class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback, AfterAllCallback {
+class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
 
     val log = LoggerFactory.getLogger(EndToEndTestExt::class.java)
 
@@ -31,11 +31,7 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback, Af
     )
 
     override fun beforeAll(context: ExtensionContext?) {
-        startKoin { modules(ar2.modules) }
-        val app = App()
-        app.setup(null, logLevel = Level.TRACE)
-        storagePath = Files.createTempDirectory("packages")
-        app.config.storage.path = storagePath.toString()
+        context!!.getStore(ExtensionContext.Namespace.GLOBAL).put("app", CloseableApp())
     }
 
     override fun beforeEach(context: ExtensionContext?) {
@@ -46,12 +42,24 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback, Af
         )
     }
 
-    override fun afterAll(context: ExtensionContext?) {
-        stopKoin()
-        log.info("Removing {}", storagePath)
-        Files.walk(storagePath)
-            .sorted(Comparator.reverseOrder())
-            .map(Path::toFile)
-            .forEach { file -> file.delete() }
+    inner class CloseableApp : ExtensionContext.Store.CloseableResource {
+        val app: App
+
+        init {
+            app = App()
+            app.setup(null, logLevel = Level.TRACE)
+            storagePath = Files.createTempDirectory("packages")
+            app.config.storage.path = storagePath.toString()
+        }
+
+        override fun close() {
+            app.close()
+            log.info("Removing {}", storagePath)
+            Files.walk(storagePath)
+                .sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach { file -> file.delete() }
+        }
     }
+
 }

@@ -18,18 +18,28 @@ import org.koin.core.get
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
 
-class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, AfterAllCallback, KoinComponent {
+class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, KoinComponent {
     private val log = LoggerFactory.getLogger(DatabaseTestExt::class.java)
 
     override fun beforeAll(context: ExtensionContext?) {
-        val app = App()
-        app.setupLogging(Level.TRACE)
-        startKoin { modules(module {
-            single { spyk(SecurityServiceImpl() as SecurityService) }
-        }) }
-        app.loadConfig(null)
-        val factory = app.connectToDatabase(showSql = true)
-        getKoin().declare(factory)
+        context!!.getStore(ExtensionContext.Namespace.GLOBAL).put("db", CloseableDatabase())
+    }
+
+    inner class CloseableDatabase : ExtensionContext.Store.CloseableResource {
+        val app: App
+
+        init {
+            startKoin {}
+            app = App()
+            app.setupLogging(Level.TRACE)
+            app.loadConfig(null)
+            val factory = app.connectToDatabase(showSql = true)
+            getKoin().declare(factory)
+        }
+
+        override fun close() {
+            stopKoin()
+        }
     }
 
     override fun beforeEach(context: ExtensionContext?) {
@@ -37,7 +47,4 @@ class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, AfterAllCallback,
         log.info("Executing test {}", context?.testMethod?.get()?.name)
     }
 
-    override fun afterAll(context: ExtensionContext?) {
-        stopKoin()
-    }
 }

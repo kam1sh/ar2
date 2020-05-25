@@ -4,19 +4,27 @@ import ar2.exceptions.IllegalActionException
 import ar2.exceptions.NoPermissionException
 import ar2.exceptions.user.UserExistsException
 import ar2.services.SecurityService
+import ar2.services.SecurityServiceImpl
 import ar2.services.UsersService
 import ar2.services.UsersServiceImpl
 import ar2.tests.e2e.randomUser
 import ar2.web.PageRequest
 import io.mockk.every
+import io.mockk.spyk
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.extension.ExtendWith
+import org.koin.core.context.loadKoinModules
+import org.koin.core.context.unloadKoinModules
 import org.koin.core.get
+import org.koin.dsl.module
 import org.koin.test.KoinTest
 
+val module = module {
+    single { spyk(SecurityServiceImpl()) as SecurityService }
+}
 @ExtendWith(DatabaseTestExt::class)
 class UsersServiceImplTest : KoinTest {
 
@@ -24,8 +32,14 @@ class UsersServiceImplTest : KoinTest {
 
     @BeforeEach
     fun before() {
+        loadKoinModules(module)
         service = UsersServiceImpl(get())
         every { get<SecurityService>().encode("TEST") } returns "TEST"
+    }
+
+    @AfterEach
+    fun after() {
+        unloadKoinModules(module)
     }
 
     @Test
