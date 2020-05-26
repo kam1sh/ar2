@@ -8,13 +8,10 @@ import ch.qos.logback.classic.Level
 import java.nio.file.Files
 import java.nio.file.Path
 import org.hibernate.SessionFactory
-import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.koin.core.KoinComponent
-import org.koin.core.context.startKoin
-import org.koin.core.context.stopKoin
 import org.koin.core.get
 import org.slf4j.LoggerFactory
 
@@ -22,7 +19,6 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
 
     val log = LoggerFactory.getLogger(EndToEndTestExt::class.java)
 
-    lateinit var storagePath: Path
     val adminUser = User(
         username = "testadmin",
         email = "admin@localhost",
@@ -30,11 +26,13 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
         isAdmin = true
     )
 
-    override fun beforeAll(context: ExtensionContext?) {
-        context!!.getStore(ExtensionContext.Namespace.GLOBAL).put("app", CloseableApp())
+    override fun beforeAll(context: ExtensionContext) {
+        context.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("app") {
+            CloseableApp()
+        }
     }
 
-    override fun beforeEach(context: ExtensionContext?) {
+    override fun beforeEach(context: ExtensionContext) {
         get<SessionFactory>().cleanAll()
         get<UsersService>().new(
             form = adminUser,
@@ -42,14 +40,16 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
         )
     }
 
-    inner class CloseableApp : ExtensionContext.Store.CloseableResource {
-        val app: App
+    class CloseableApp : ExtensionContext.Store.CloseableResource {
+        val log = LoggerFactory.getLogger(CloseableApp::class.java)
+        val storagePath: Path
+        val app = App()
 
         init {
-            app = App()
             app.setup(null, logLevel = Level.TRACE)
             storagePath = Files.createTempDirectory("packages")
             app.config.storage.path = storagePath.toString()
+            log.info("Application ready.")
         }
 
         override fun close() {
@@ -61,5 +61,4 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
                 .forEach { file -> file.delete() }
         }
     }
-
 }

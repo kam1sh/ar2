@@ -48,6 +48,7 @@ class GroupsServiceImpl : GroupsService, KoinComponent {
             it.createQuery("update Group set owner = :owner where name = :name")
                 .setParameter("owner", owner)
                 .setParameter("name", name)
+                .executeUpdate()
         }
     }
 
@@ -74,11 +75,9 @@ class GroupsServiceImpl : GroupsService, KoinComponent {
 
     private fun findGroupRole(groupId: Int, userId: Int): GroupRole? =
         sessions.openSession().use {
-            val result = it.createQuery("from GroupRole gr where gr.userId = :userId and gr.groupId = :groupId", GroupRole::class.java)
+            it.createQuery("from GroupRole gr where gr.userId = :userId and gr.groupId = :groupId", GroupRole::class.java)
                 .setParameter("userId", userId)
                 .setParameter("groupId", groupId)
                 .uniqueResult()
-            log.debug("query result: {}", result)
-            result
         }
 }

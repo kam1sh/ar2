@@ -6,8 +6,6 @@ import ar2.lib.session.Credentials
 import ar2.lib.session.Session
 import ar2.lib.session.adminSession
 import ar2.services.SecurityService
-import ar2.services.SecurityServiceImpl
-import io.mockk.spyk
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import kotlin.test.assertNotNull
@@ -15,7 +13,6 @@ import kotlin.test.assertTrue
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.cookie.cookie
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.test.KoinTest
