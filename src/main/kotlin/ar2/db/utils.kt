@@ -4,10 +4,11 @@ import ar2.web.PageRequest
 import org.hibernate.Session
 import org.hibernate.SessionFactory
 import org.koin.core.KoinComponent
-import org.koin.core.inject
+import org.koin.core.get
 
 object SessionFactoryHolder : KoinComponent {
-    val factory: SessionFactory by inject()
+    val factory: SessionFactory
+        get() = get()
     val session
         get() = factory.openSession()
 }

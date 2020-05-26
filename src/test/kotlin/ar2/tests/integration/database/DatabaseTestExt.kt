@@ -15,29 +15,31 @@ import org.slf4j.LoggerFactory
 class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, KoinComponent {
     private val log = LoggerFactory.getLogger(DatabaseTestExt::class.java)
 
-    override fun beforeAll(context: ExtensionContext) {
-        context.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("db") {
-            CloseableDatabase()
-        }
-    }
-
-    class CloseableDatabase : ExtensionContext.Store.CloseableResource {
-        val app: App
-        private val log = LoggerFactory.getLogger(CloseableDatabase::class.java)
-        init {
-            startKoin {}
-            app = App()
-            app.setupLogging(Level.TRACE)
-            app.loadConfig(null)
-            val factory = app.connectToDatabase(showSql = true)
-            app.getKoin().declare(factory)
-            log.info("Database ready.")
+        override fun beforeAll(context: ExtensionContext) {
+            context.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("db") {
+                CloseableDatabase()
+            }
         }
 
-        override fun close() {
-            app.close()
+        class CloseableDatabase : ExtensionContext.Store.CloseableResource {
+            val app: App
+            private val log = LoggerFactory.getLogger(CloseableDatabase::class.java)
+            init {
+                startKoin {}
+                app = App()
+                app.setupLogging(Level.TRACE)
+                app.loadConfig(null)
+                val factory = app.connectToDatabase(showSql = true)
+                app.getKoin().declare(factory)
+                log.info("Database ready.")
+            }
+
+            override fun close() {
+                log.info("Closing application.")
+                app.get<SessionFactory>().close()
+                app.close()
+            }
         }
-    }
 
     override fun beforeEach(context: ExtensionContext) {
         get<SessionFactory>().cleanAll()
