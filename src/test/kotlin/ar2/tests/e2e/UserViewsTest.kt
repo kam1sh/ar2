@@ -1,5 +1,6 @@
 package ar2.tests.e2e
 
+import EndToEndTest
 import ar2.db.entities.User
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
@@ -11,12 +12,11 @@ import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.get
 import org.koin.test.KoinTest
 
-@ExtendWith(EndToEndTestExt::class)
-class UserViewsE2ETest : KoinTest {
+@EndToEndTest
+class UserViewsTest : KoinTest {
 
     @Test
     fun testCurrentWithNoSession() {

@@ -1,13 +1,12 @@
-package ar2.tests.e2e
+package ar2.lib
 
 import ar2.App
 import ar2.db.entities.User
-import ar2.lib.cleanAll
 import ar2.services.UsersService
-import ch.qos.logback.classic.Level
 import java.nio.file.Files
 import java.nio.file.Path
 import org.hibernate.SessionFactory
+import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
@@ -15,7 +14,7 @@ import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.slf4j.LoggerFactory
 
-class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
+class EndToEndTestExt : KoinComponent, BeforeAllCallback, AfterAllCallback, BeforeEachCallback {
 
     val log = LoggerFactory.getLogger(EndToEndTestExt::class.java)
 
@@ -27,9 +26,17 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
     )
 
     override fun beforeAll(context: ExtensionContext) {
+        val app = context.getApp()
+        log.info("Launching application.")
+        app.startDI()
         context.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("app") {
-            CloseableApp()
+            CloseableApp(app)
         }
+    }
+
+    override fun afterAll(context: ExtensionContext) {
+        val app = context.getApp()
+        app.stopDI()
     }
 
     override fun beforeEach(context: ExtensionContext) {
@@ -40,20 +47,21 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, BeforeEachCallback {
         )
     }
 
-    class CloseableApp : ExtensionContext.Store.CloseableResource {
+    class CloseableApp(val app: App) : ExtensionContext.Store.CloseableResource {
         val log = LoggerFactory.getLogger(CloseableApp::class.java)
         val storagePath: Path
-        val app = App()
 
         init {
-            app.setup(null, logLevel = Level.TRACE)
+            app.loadConfig(null)
+            app.sessionFactory = app.sessionFactory ?: app.connectToDatabase(showSql = true)
+            app.getKoin().declare(app.sessionFactory!!)
             storagePath = Files.createTempDirectory("packages")
             app.config.storage.path = storagePath.toString()
             log.info("Application ready.")
         }
 
         override fun close() {
-            app.close()
+            app.stopDI()
             log.info("Removing {}", storagePath)
             Files.walk(storagePath)
                 .sorted(Comparator.reverseOrder())

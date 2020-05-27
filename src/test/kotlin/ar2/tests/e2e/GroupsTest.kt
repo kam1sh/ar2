@@ -1,5 +1,6 @@
 package ar2.tests.e2e
 
+import EndToEndTest
 import ar2.lib.session.APIError
 import ar2.lib.session.adminSession
 import ar2.services.GroupsService
@@ -9,12 +10,11 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.http4k.core.Status
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.core.KoinComponent
 import org.koin.core.get
 import org.koin.test.KoinTest
 
-@ExtendWith(EndToEndTestExt::class)
+@EndToEndTest
 class GroupsTest : KoinTest {
     @Test
     fun testCreateRemoveGroup() {

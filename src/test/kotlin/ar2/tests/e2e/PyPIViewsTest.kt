@@ -1,15 +1,15 @@
 package ar2.tests.e2e
 
+import EndToEndTest
 import ar2.web.WebHandler
 import kotlin.test.assertEquals
 import org.http4k.core.*
 import org.http4k.lens.MultipartFormFile
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.test.KoinTest
 import org.koin.test.get
 
-@ExtendWith(EndToEndTestExt::class)
+@EndToEndTest
 class PyPIViewsTest : KoinTest {
 
     @Test

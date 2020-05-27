@@ -1,5 +1,6 @@
 package ar2.tests.e2e
 
+import EndToEndTest
 import ar2.Config
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
@@ -14,12 +15,11 @@ import org.http4k.core.Method
 import org.http4k.core.Status
 import org.http4k.core.cookie.cookie
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.test.KoinTest
 import org.koin.test.get
 import org.koin.test.inject
 
-@ExtendWith(EndToEndTestExt::class)
+@EndToEndTest
 class AppTest : KoinTest {
     private val securityService: SecurityService by inject()
 

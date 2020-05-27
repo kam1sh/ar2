@@ -50,7 +50,7 @@ class App : KoinComponent, AutoCloseable {
     private val log = LoggerFactory.getLogger(javaClass)
 
     lateinit var config: Config
-    lateinit var sessionFactory: SessionFactory
+    var sessionFactory: SessionFactory? = null
 
     fun loadConfig(file: File?) {
         val fileOrDef = file ?: File("ar2.yaml")
@@ -72,16 +72,19 @@ class App : KoinComponent, AutoCloseable {
      * Setups everything needed to run application. Logging, config, database, etc.
      */
     fun setup(configFile: File?, logLevel: Level = Level.INFO) {
-        startKoin { modules(modules) }
+        startDI()
         loadConfig(configFile)
         setupLogging(logLevel)
         val factory = connectToDatabase(showSql = logLevel == Level.TRACE)
         getKoin().declare(factory)
     }
 
+    fun startDI() = startKoin { modules(modules) }
+    fun stopDI() = stopKoin()
+
     override fun close() {
-        if (::sessionFactory.isInitialized) sessionFactory.close()
-        stopKoin()
+        sessionFactory?.close()
+        stopDI()
     }
 }
 
