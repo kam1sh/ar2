@@ -1,7 +1,11 @@
 package ar2.tests.e2e
 
 import EndToEndTest
+import ar2.db.entities.User
+import ar2.lib.api.AdminSession
+import ar2.lib.api.RandomUser
 import ar2.lib.session.APIError
+import ar2.lib.session.Session
 import ar2.lib.session.adminSession
 import ar2.services.GroupsService
 import ar2.services.UsersService
@@ -26,37 +30,25 @@ class GroupsTest : KoinTest {
     }
 
     @Test
-    fun testGroupRole() {
-        val sess = adminSession()
-        val user = randomUser()
-        withUser(user, "test123") {
-            sess.groups.new("test")
-            try {
-                sess.groups.addRole("test", user.username, Role.DEVELOPER)
-                null
-            } finally {
-                sess.groups.remove("test")
-            }
-        }
+    fun testGroupRole(@AdminSession sess: Session, @RandomUser user: User) {
+        sess.groups.new("test")
+        sess.groups.addRole("test", user.username, Role.DEVELOPER)
+        sess.groups.remove("test")
     }
 
     @Test
-    fun testGroupRoleActions() {
-        val sess = adminSession()
-        val user = randomUser()
+    fun testGroupRoleActions(@AdminSession sess: Session, @RandomUser user: User) {
         var err = assertFailsWith<APIError> {
             sess.groups.addRole("test", user.username, Role.MAINTAINER)
         }
         assertEquals(Status.BAD_REQUEST, err.resp.status)
-        withUser(user, "test123") {
-            withGroup("test", user.username) {
+        withGroup("test", user.username) {
+            sess.groups.addRole("test", user.username, Role.MAINTAINER)
+            // add same group twice
+            err = assertFailsWith<APIError> {
                 sess.groups.addRole("test", user.username, Role.MAINTAINER)
-                // add same group twice
-                err = assertFailsWith<APIError> {
-                    sess.groups.addRole("test", user.username, Role.MAINTAINER)
-                }
-                assertEquals(Status.CONFLICT, err.resp.status)
             }
+            assertEquals(Status.CONFLICT, err.resp.status)
         }
     }
 }

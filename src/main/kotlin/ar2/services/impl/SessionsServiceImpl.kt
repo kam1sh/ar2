@@ -1,10 +1,11 @@
-package ar2.services
+package ar2.services.impl
 
 import ar2.Config
 import ar2.db.entities.Session
 import ar2.db.entities.User
 import ar2.db.transaction
 import ar2.exceptions.UnauthorizedException
+import ar2.services.SessionsService
 import java.time.LocalDateTime
 import java.util.concurrent.ThreadLocalRandom
 import org.hibernate.SessionFactory

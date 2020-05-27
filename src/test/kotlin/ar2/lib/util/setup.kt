@@ -1,7 +1,8 @@
-package ar2.lib
+package ar2.lib.util
 
 import ar2.App
 import ch.qos.logback.classic.Level
+import java.io.File
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.slf4j.LoggerFactory
 
@@ -12,12 +13,20 @@ fun ExtensionContext.setupApp(): App {
     val app = root.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent(appContextKey) {
         doSetupApp()
     } as App
-    root.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("appResource") { AppResource(app) }
+    root.getStore(ExtensionContext.Namespace.GLOBAL).getOrComputeIfAbsent("appResource") {
+        AppResource(
+            app
+        )
+    }
     return app
 }
 
 fun ExtensionContext.getApp(): App {
     return getStore(ExtensionContext.Namespace.GLOBAL).get(appContextKey, App::class.java)
+}
+
+fun App.loadTestConfig() {
+    loadConfig(File("ar2-test.yaml"))
 }
 
 private fun doSetupApp(): App {

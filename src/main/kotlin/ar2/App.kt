@@ -7,6 +7,10 @@ import ar2.db.doConnectToDatabase
 import ar2.facades.UsersFacade
 import ar2.facades.UsersFacadeImpl
 import ar2.services.*
+import ar2.services.impl.GroupsServiceImpl
+import ar2.services.impl.SecurityServiceImpl
+import ar2.services.impl.SessionsServiceImpl
+import ar2.services.impl.UsersServiceImpl
 import ar2.web.WebHandler
 import ar2.web.views.AuthenticationViews
 import ar2.web.views.GroupViews
@@ -31,12 +35,12 @@ import org.slf4j.LoggerFactory
 
 @Suppress("USELESS_CAST")
 val modules = module {
-    single { SecurityServiceImpl() as SecurityService }
-    single { UsersServiceImpl(get()) as UsersService }
-    single { SessionsServiceImpl() as SessionsService }
-    single { GroupsServiceImpl() as GroupsService }
+    single<SecurityService> { SecurityServiceImpl() }
+    single<UsersService> { UsersServiceImpl(get()) }
+    single<SessionsService> { SessionsServiceImpl() }
+    single<GroupsService> { GroupsServiceImpl() }
 
-    single { UsersFacadeImpl(get()) as UsersFacade }
+    single<UsersFacade> { UsersFacadeImpl(get()) }
 
     single { AuthenticationViews(get(), get()) }
     single { UserViews(get()) }
@@ -49,14 +53,21 @@ val modules = module {
 class App : KoinComponent, AutoCloseable {
     private val log = LoggerFactory.getLogger(javaClass)
 
-    lateinit var config: Config
+    private var _config: Config? = null
     var sessionFactory: SessionFactory? = null
+
+    val config: Config
+        get() = _config ?: throw IllegalStateException("Configuration is not loaded yet.")
 
     fun loadConfig(file: File?) {
         val fileOrDef = file ?: File("ar2.yaml")
         log.info("Using configuration file {}", fileOrDef.name)
-        config = fileOrDef.toConfig()
-        getKoin().declare(config)
+        _config = _config ?: fileOrDef.toConfig()
+        getKoin().declare(_config)
+    }
+
+    fun unloadConfig() {
+        _config = null
     }
 
     fun setupLogging(level: Level = Level.INFO) {

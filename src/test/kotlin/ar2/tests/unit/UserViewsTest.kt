@@ -1,6 +1,5 @@
 package ar2.tests.unit
 
-import ar2.App
 import ar2.db.entities.User
 import ar2.exceptions.UnauthorizedException
 import ar2.facades.UsersFacade
@@ -11,10 +10,8 @@ import ar2.services.SessionsService
 import ar2.tests.e2e.randomUser
 import ar2.web.PageRequest
 import ar2.web.views.UserViews
-import ch.qos.logback.classic.Level
 import com.fasterxml.jackson.core.type.TypeReference
 import io.mockk.*
-import java.io.File
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
 import org.http4k.core.Method
@@ -42,9 +39,6 @@ class UserViewsTest : KoinTest {
             single { mockk<SessionsService>() }
         }
         startKoin { modules(module) }
-        val app = App()
-        app.setupLogging(Level.TRACE)
-        app.loadConfig(File("ar2.yaml"))
         val securityService = get<SecurityService>()
         every { securityService.randomString(any()) } returns "TESTING"
     }

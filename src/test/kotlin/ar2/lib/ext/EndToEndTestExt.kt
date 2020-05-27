@@ -1,7 +1,10 @@
-package ar2.lib
+package ar2.lib.ext
 
 import ar2.App
 import ar2.db.entities.User
+import ar2.lib.util.cleanAll
+import ar2.lib.util.getApp
+import ar2.lib.util.loadTestConfig
 import ar2.services.UsersService
 import java.nio.file.Files
 import java.nio.file.Path
@@ -52,7 +55,7 @@ class EndToEndTestExt : KoinComponent, BeforeAllCallback, AfterAllCallback, Befo
         val storagePath: Path
 
         init {
-            app.loadConfig(null)
+            app.loadTestConfig()
             app.sessionFactory = app.sessionFactory ?: app.connectToDatabase(showSql = true)
             app.getKoin().declare(app.sessionFactory!!)
             storagePath = Files.createTempDirectory("packages")

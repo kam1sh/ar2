@@ -2,7 +2,7 @@ package ar2.web
 
 import ar2.services.SecurityService
 import ar2.services.SessionsService
-import ar2.services.contexts
+import ar2.services.impl.contexts
 import ar2.web.views.AuthenticationViews
 import ar2.web.views.GroupViews
 import ar2.web.views.PyPIViews

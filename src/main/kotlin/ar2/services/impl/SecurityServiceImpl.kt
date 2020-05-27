@@ -1,7 +1,8 @@
-package ar2.services
+package ar2.services.impl
 
 import ar2.db.entities.User
 import ar2.exceptions.user.NoSuchUserException
+import ar2.services.*
 import at.favre.lib.crypto.bcrypt.BCrypt
 import at.favre.lib.crypto.bcrypt.LongPasswordStrategies
 import java.util.concurrent.ThreadLocalRandom
@@ -54,20 +55,21 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
     }
 
     override fun randomString(length: Int): String {
-        val sb = StringBuilder()
-        for (x in 0..length) {
-            val chars = listOf(
-                randomChar(48, 57),
-                randomChar(65, 90),
-                randomChar(97, 122),
-                '_'
-            )
-            sb.append(chars[random.nextInt(0, chars.size)])
-        }
-        return sb.toString()
+        return random.nextString(length)
     }
-    private fun randomChar(start: Int, end: Int): Char {
-        val out = random.nextInt(start, end)
-        return out.toChar()
+}
+
+fun ThreadLocalRandom.nextString(length: Int): String {
+    fun nextChar(start: Int, end: Int): Char = nextInt(start, end).toChar()
+    val sb = StringBuilder()
+    for (x in 0..length) {
+        val chars = listOf(
+            nextChar(48, 57), // numbers
+            nextChar(65, 90), // uppercase
+            nextChar(97, 122), // lowercase
+            '_' // underscore
+        )
+        sb.append(chars[nextInt(0, chars.size)])
     }
+    return sb.toString()
 }

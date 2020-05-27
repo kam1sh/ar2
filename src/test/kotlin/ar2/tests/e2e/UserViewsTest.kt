@@ -2,12 +2,15 @@ package ar2.tests.e2e
 
 import EndToEndTest
 import ar2.db.entities.User
+import ar2.lib.api.AdminSession
+import ar2.lib.api.RandomUser
+import ar2.lib.api.randomUserPassword
 import ar2.lib.session.APIError
 import ar2.lib.session.Credentials
 import ar2.lib.session.Session
-import ar2.lib.session.adminSession
-import ar2.services.SecurityService
 import ar2.services.UsersService
+import ar2.services.impl.nextString
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.test.*
 import org.http4k.core.Method
 import org.http4k.core.Status
@@ -27,9 +30,8 @@ class UserViewsTest : KoinTest {
     }
 
     @Test
-    fun testCurrent() {
-        val sess = adminSession()
-        val user = sess.users.current()
+    fun testCurrent(@AdminSession session: Session) {
+        val user = session.users.current()
         assertEquals("testadmin", user.username)
         assertNull(user.passwordHash)
         assertNotNull(user.createdOn)
@@ -37,22 +39,19 @@ class UserViewsTest : KoinTest {
     }
 
     @Test
-    fun testList() {
-        val sess = adminSession()
+    fun testList(@AdminSession sess: Session) {
         val usersList = sess.users.list()
         assertTrue(usersList.count() > 0, "There is no users in list, expected more than zero")
     }
 
     @Test
-    fun testIterator() {
-        val sess = adminSession()
+    fun testIterator(@AdminSession sess: Session) {
         val users = sess.users.iter()
         assertTrue(users.asSequence().count() > 0)
     }
 
     @Test
-    fun testFindNotExistingUser() {
-        val sess = adminSession()
+    fun testFindNotExistingUser(@AdminSession sess: Session) {
         var error = assertFailsWith<APIError> { sess.users.find("notexisting") }
         assertEquals(Status.NOT_FOUND, error.resp.status)
         error = assertFailsWith<APIError> { sess.users.find(-1) }
@@ -60,8 +59,7 @@ class UserViewsTest : KoinTest {
     }
 
     @Test
-    fun testCreateDisableUser() {
-        val sess = adminSession()
+    fun testCreateDisableUser(@AdminSession sess: Session) {
         val user = randomUser()
         var resp = sess.users.new(user, "test123")
         assertEquals(Status.CREATED, resp.status)
@@ -70,24 +68,21 @@ class UserViewsTest : KoinTest {
     }
 
     @Test
-    fun testNewUser() {
-        val sess = adminSession()
-        withUser(null, "test123") {
-            assertFailsWith<APIError> {
-                sess.users.new(it, "test456")
-            }
-            val found = sess.users.find(it.username)
-            assertNull(found.lastLogin)
-            val userSession = Session(Credentials(it.username, "test123"))
-            userSession.login()
-            assertEquals(userSession.users.current().id, found.id)
+    fun testNewUser(@AdminSession sess: Session, @RandomUser user: User) {
+        assertFailsWith<APIError> {
+            sess.users.new(user, "test456")
         }
+        val found = sess.users.find(user.username)
+        assertNull(found.lastLogin)
+        val userSession = Session(Credentials(user.username, randomUserPassword))
+        userSession.login()
+        assertEquals(userSession.users.current().id, found.id)
     }
 }
 
-fun KoinTest.randomUser(): User {
-    val securityService = get<SecurityService>()
-    val username = "test_" + securityService.randomString(20)
+fun randomUser(): User {
+    val random = ThreadLocalRandom.current()
+    val username = "test_" + random.nextString(20)
     return User(
         username = username,
         email = "TEST@test.test",

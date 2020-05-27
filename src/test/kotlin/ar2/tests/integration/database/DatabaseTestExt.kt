@@ -1,8 +1,9 @@
 package ar2.tests.integration.database
 
 import ar2.App
-import ar2.lib.cleanAll
-import ar2.lib.getApp
+import ar2.lib.util.cleanAll
+import ar2.lib.util.getApp
+import ar2.lib.util.loadTestConfig
 import org.hibernate.SessionFactory
 import org.junit.jupiter.api.extension.AfterAllCallback
 import org.junit.jupiter.api.extension.BeforeAllCallback
@@ -20,7 +21,7 @@ class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, AfterAllCallback,
     override fun beforeAll(context: ExtensionContext) {
         app = context.getApp()
         startKoin {}
-        app.loadConfig(null)
+        app.loadTestConfig()
         val factory = app.sessionFactory ?: app.connectToDatabase(showSql = true)
         app.getKoin().declare(factory)
         log.info("Database ready.")
@@ -28,6 +29,7 @@ class DatabaseTestExt : BeforeAllCallback, BeforeEachCallback, AfterAllCallback,
 
     override fun afterAll(context: ExtensionContext) {
         get<SessionFactory>().close()
+        app.sessionFactory = null
         app.stopDI()
     }
 

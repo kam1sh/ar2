@@ -1,4 +1,4 @@
-package ar2.lib
+package ar2.lib.util
 
 import org.hibernate.SessionFactory
 

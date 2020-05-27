@@ -1,4 +1,4 @@
-package ar2.services
+package ar2.services.impl
 
 import ar2.db.entities.Group
 import ar2.db.entities.GroupRole
@@ -7,6 +7,7 @@ import ar2.db.pagedQuery
 import ar2.db.transaction
 import ar2.exceptions.GroupRoleExistsException
 import ar2.exceptions.NoSuchGroupException
+import ar2.services.GroupsService
 import ar2.users.Role
 import ar2.web.PageRequest
 import org.hibernate.SessionFactory

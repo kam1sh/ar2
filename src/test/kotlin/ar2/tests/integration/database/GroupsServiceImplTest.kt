@@ -1,6 +1,8 @@
 package ar2.tests.integration.database
 
 import ar2.services.*
+import ar2.services.impl.GroupsServiceImpl
+import ar2.services.impl.UsersServiceImpl
 import io.mockk.every
 import io.mockk.mockk
 import kotlin.test.assertEquals
@@ -8,7 +10,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.koin.test.KoinTest
-import org.koin.test.get
 
 @ExtendWith(DatabaseTestExt::class)
 class GroupsServiceImplTest : KoinTest {

@@ -1,5 +1,6 @@
-package ar2.lib
+package ar2.lib.ext
 
+import ar2.lib.util.setupApp
 import org.junit.jupiter.api.extension.BeforeAllCallback
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext

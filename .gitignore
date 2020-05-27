@@ -39,5 +39,6 @@ build/
 build
 
 ar2.yaml
+ar2-test.yaml
 .python-version
 

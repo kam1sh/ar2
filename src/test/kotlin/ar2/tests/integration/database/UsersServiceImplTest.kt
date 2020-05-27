@@ -4,9 +4,9 @@ import ar2.exceptions.IllegalActionException
 import ar2.exceptions.NoPermissionException
 import ar2.exceptions.user.UserExistsException
 import ar2.services.SecurityService
-import ar2.services.SecurityServiceImpl
 import ar2.services.UsersService
-import ar2.services.UsersServiceImpl
+import ar2.services.impl.SecurityServiceImpl
+import ar2.services.impl.UsersServiceImpl
 import ar2.tests.e2e.randomUser
 import ar2.web.PageRequest
 import io.mockk.every
