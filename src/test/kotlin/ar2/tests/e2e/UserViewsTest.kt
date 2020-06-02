@@ -69,9 +69,10 @@ class UserViewsTest : KoinTest {
 
     @Test
     fun testNewUser(@AdminSession sess: Session, @RandomUser user: User) {
-        assertFailsWith<APIError> {
+        val err = assertFailsWith<APIError> {
             sess.users.new(user, "test456")
         }
+        assertEquals(Status.BAD_REQUEST, err.resp.status)
         val found = sess.users.find(user.username)
         assertNull(found.lastLogin)
         val userSession = Session(Credentials(user.username, randomUserPassword))

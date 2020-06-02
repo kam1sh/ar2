@@ -1,16 +1,21 @@
-package ar2.facades
+package ar2.facades.impl
 
 import ar2.db.entities.User
+import ar2.facades.UsersFacade
+import ar2.services.GroupsService
 import ar2.services.UsersService
 import ar2.web.PageRequest
 import org.koin.core.KoinComponent
 
 class UsersFacadeImpl(
-    private val service: UsersService
+    private val service: UsersService,
+    private val groupsService: GroupsService
 ) : UsersFacade, KoinComponent {
 
-    override fun new(form: User, password: String, issuer: User): User {
-        return service.new(form, password, issuer)
+    override fun new(form: User, password: String, issuer: User?): User {
+        val user = service.new(form, password, issuer)
+        groupsService.new(user.username, user)
+        return user
     }
 
     override fun find(username: String) = service.find(username)

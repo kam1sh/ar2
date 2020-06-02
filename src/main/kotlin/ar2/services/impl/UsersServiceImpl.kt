@@ -20,12 +20,8 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
 
     private val factory: SessionFactory by inject()
 
-    override fun new(form: User, password: String, issuer: User): User {
-        issuer.assertAdmin()
-        return new(form, password)
-    }
-
-    override fun new(form: User, password: String): User {
+    override fun new(form: User, password: String, issuer: User?): User {
+        issuer?.assertAdmin()
         // firstly try to find existing user
         try {
             val user = find(form.username)

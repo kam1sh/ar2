@@ -8,9 +8,7 @@ interface UsersService {
      * Creates new user from request and password.
      * @throws UserExistsException if user already exists
      */
-    fun new(form: User, password: String): User
-
-    fun new(form: User, password: String, issuer: User): User
+    fun new(form: User, password: String, issuer: User? = null): User
 
     /**
      * Creates new user or enables back existing user

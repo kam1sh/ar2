@@ -5,7 +5,7 @@ import ar2.cli.Maintenance
 import ar2.cli.Serve
 import ar2.db.doConnectToDatabase
 import ar2.facades.UsersFacade
-import ar2.facades.UsersFacadeImpl
+import ar2.facades.impl.UsersFacadeImpl
 import ar2.services.*
 import ar2.services.impl.GroupsServiceImpl
 import ar2.services.impl.SecurityServiceImpl
@@ -40,7 +40,7 @@ val modules = module {
     single<SessionsService> { SessionsServiceImpl() }
     single<GroupsService> { GroupsServiceImpl() }
 
-    single<UsersFacade> { UsersFacadeImpl(get()) }
+    single<UsersFacade> { UsersFacadeImpl(get(), get()) }
 
     single { AuthenticationViews(get(), get()) }
     single { UserViews(get()) }
