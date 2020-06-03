@@ -52,21 +52,22 @@ class UserViewsTest : KoinTest {
     @Test
     fun testList() {
         val pr = PageRequest(offset = 0, limit = 10)
-        var user: User
+        val user = randomUser()
         var userList: List<User>? = null
         val views = mockViews {
-            user = randomUser()
             userList = listOf(user)
-            every { it.find(pr) } returns userList!!
+            every { it.find(pr, user) } returns userList!!
         }
         val request = Session().prepareRequest(Method.GET, "/")
             .query("offset", "0")
             .query("limit", "10")
+        val sessionsService = get<SessionsService>()
+        every { sessionsService.findUser(any() as Request) } returns user
         val resp = views(request)
         assertEquals(Status.OK, resp.status)
         assertEquals(userList!!, resp.deserialize(object : TypeReference<List<User>>() {}))
         val facade = get<UsersFacade>()
-        verify { facade.find(pr) }
+        verify { facade.find(pr, user) }
         confirmVerified(facade)
     }
 

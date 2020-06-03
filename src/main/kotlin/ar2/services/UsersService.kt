@@ -19,7 +19,7 @@ interface UsersService {
     /**
      * Lists all enabled users.
      */
-    fun find(pr: PageRequest): List<User>
+    fun find(pr: PageRequest, issuer: User): List<User>
 
     /**
      * Finds user (even disabled) by username.

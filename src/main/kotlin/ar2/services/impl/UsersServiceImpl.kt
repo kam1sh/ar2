@@ -48,7 +48,8 @@ class UsersServiceImpl(private val securityService: SecurityService) : UsersServ
         }
     }
 
-    override fun find(pr: PageRequest): List<User> = factory.openSession().use {
+    override fun find(pr: PageRequest, issuer: User): List<User> = factory.openSession().use {
+        issuer.assertAdmin()
         it.pagedQuery(pr, "from User where disabled = false", User::class.java)
     }
 

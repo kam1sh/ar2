@@ -64,7 +64,7 @@ class UserViews(
     private fun listUsers(request: Request): Response {
         request.checkApiAcceptHeader()
         val pr = request.toPageRequest()
-        val users = facade.find(pr)
+        val users = facade.find(pr, extractUser(request))
         return listUsersLens(users, Response(Status.OK))
     }
 

@@ -20,7 +20,7 @@ class UsersFacadeImpl(
 
     override fun find(username: String) = service.find(username)
     override fun find(id: Int) = service.find(id)
-    override fun find(pr: PageRequest) = service.find(pr)
+    override fun find(pr: PageRequest, issuer: User) = service.find(pr, issuer)
 
     override fun update(id: Int, form: User, password: String, issuer: User) {
         service.update(id, form, password, issuer)
