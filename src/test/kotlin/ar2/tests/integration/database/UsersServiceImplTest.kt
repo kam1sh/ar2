@@ -7,11 +7,9 @@ import ar2.exceptions.user.UserExistsException
 import ar2.lib.api.RandomAdmin
 import ar2.lib.api.RandomUser
 import ar2.lib.api.RequiresUsers
-import ar2.services.SecurityService
 import ar2.services.UsersService
 import ar2.tests.e2e.randomUser
 import ar2.web.PageRequest
-import io.mockk.every
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 import kotlin.test.assertTrue

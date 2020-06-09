@@ -13,8 +13,9 @@ class Serve(val app: App) : CliktCommand() {
     private val log = LoggerFactory.getLogger(javaClass)
 
     private fun startServer(): Http4kServer {
-        val server = app.get<WebHandler>().asServer(Undertow(app.config.listen.port))
-        log.info("Launching server at port {}.", app.config.listen.port)
+        val undertow = Undertow(app.config.listen)
+        val server = app.get<WebHandler>().asServer(undertow)
+        log.info("Launching server at port {}.", app.config.listen)
         return server.start()
     }
 

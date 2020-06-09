@@ -6,6 +6,7 @@ import org.http4k.core.Filter
 
 interface SecurityService {
     fun basicAuth(): Filter
+    fun checkAttempts(): Filter
     fun requireSession(): Filter
     fun encode(password: String): String
     fun authenticate(creds: Credentials): User?

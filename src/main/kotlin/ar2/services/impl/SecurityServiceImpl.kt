@@ -29,6 +29,13 @@ class SecurityServiceImpl : SecurityService, KoinComponent {
         ))
     private val random get() = ThreadLocalRandom.current()
 
+    override fun checkAttempts() = Filter { next ->
+        { request ->
+            // TODO implement storing address in request
+            next(request)
+        }
+    }
+
     override fun basicAuth() = ServerFilters.BasicAuth(
             "ar2 authentication", key = contextKey, lookup = ::authenticate
     )

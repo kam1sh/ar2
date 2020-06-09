@@ -30,10 +30,10 @@ nb-configuration.xml
 # Gradle
 .gradle/
 gradle/
+!gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 build/
 
-# Ignore Gradle project-specific cache directory
-.gradle
 
 # Ignore Gradle build output directory
 build

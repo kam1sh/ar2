@@ -1,12 +1,13 @@
-listen:
-  host: localhost # not implemented
-  port: 8080
+listen: 8080
 
 storage:
   path: /tmp/packages
   maxFileSize: 4G
 
 security:
+  loginAttemptsWindow:
+    duration: 10m
+    count: 10
   sessionLifetimeDays: 2
   cookieName: AR2SESSION
   secret: anchor2
