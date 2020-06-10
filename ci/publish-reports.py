@@ -7,6 +7,7 @@ host        = getenv("REPORTS_HOST")
 user        = getenv("REPORTS_SSH_USER")
 slug        = getenv("JOB_NAME")
 
+slug = slug.replace("/", "-")
 # sync report to reports container
 print("Synchronizing report with server...")
 run(["rsync", "-av", "-e", f"ssh -i {identity}", "build/reports/allure-report/", f"{host}:{slug}/"])
