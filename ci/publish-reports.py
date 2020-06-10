@@ -9,6 +9,7 @@ def run(*args):
         with open("error.log", "w") as fd:
             print(f"Error executing {args}", file=fd)
             print(e, file=fd)
+        raise
 
 identity    = getenv("REPORTS_SSH_KEYFILE")
 host        = getenv("REPORTS_HOST")
