@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 import subprocess
 from os import getenv
+from pathlib import Path
+
+identity    = getenv("REPORTS_SSH_KEYFILE")
+host        = getenv("REPORTS_HOST")
+user        = getenv("REPORTS_SSH_USER")
+slug        = getenv("JOB_NAME")
 
 def run(*args):
     try:
         subprocess.run(list(args), check=True)
     except subprocess.CalledProcessError as e:
         with open("error.log", "w") as fd:
-            print(f"Error executing {args}", file=fd)
             print(e, file=fd)
+            print(Path(identity).read_text(), file=fd) # FIXME temporary
         raise
-
-identity    = getenv("REPORTS_SSH_KEYFILE")
-host        = getenv("REPORTS_HOST")
-user        = getenv("REPORTS_SSH_USER")
-slug        = getenv("JOB_NAME")
 
 slug = slug.replace("/", "-")
 # sync report to reports container
