@@ -12,7 +12,7 @@ pipeline {
         }
         stage('test') {
             steps {
-                sh 'echo "$TEST_CONFIG" > ar2-test.yaml'
+                sh 'cp $TEST_CONFIG ar2-test.yaml'
                 sh './gradlew test'
             }
         }
