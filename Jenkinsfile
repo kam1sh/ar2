@@ -18,6 +18,8 @@ pipeline {
             post {
                 always {
                     sh './gradlew allureReport'
+                    sh './ci/publish-reports.py'
+/*
                     publishHTML (target: [
                         allowMissing: false,
                         alwaysLinkToLastBuild: false,
@@ -27,6 +29,7 @@ pipeline {
                         reportName: 'Allure report',
                         reportTitles: 'Allure report'
                     ])
+ */
                 }
             }
         }
