@@ -18,6 +18,6 @@ slug        = getenv("JOB_NAME")
 slug = slug.replace("/", "-")
 # sync report to reports container
 print("Synchronizing report with server...")
-run(["rsync", "-av", "-e", f"ssh -i {identity}", "build/reports/allure-report/", f"{user}@{host}:{slug}/"])
-run(["ssh", "-i", identity, f"{user}@{host}", "ln", "-s", slug, "latest"])
+run("rsync", "-av", "-e", f"ssh -i {identity}", "build/reports/allure-report/", f"{user}@{host}:{slug}/")
+run("ssh", "-i", identity, f"{user}@{host}", "ln", "-s", slug, "latest")
 print(f"Report available at {slug}")
