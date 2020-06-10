@@ -1,5 +1,8 @@
 pipeline {
     agent { label 'project=ar2' }
+    environment {
+        TEST_CONFIG = credentials('AR2_TESTCONFIG')
+    }
     stages {
         stage('checkout and build') {
             steps {
@@ -9,6 +12,7 @@ pipeline {
         }
         stage('test') {
             steps {
+                sh 'echo "$TEST_CONFIG" > ar2-test.yaml'
                 sh './gradlew test'
             }
         }
