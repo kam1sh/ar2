@@ -1,7 +1,10 @@
 pipeline {
     agent { label 'project=ar2' }
     environment {
-        TEST_CONFIG = credentials('AR2_TESTCONFIG')
+        TEST_CONFIG = credentials('ar2-test.yaml')
+        REPORTS_HOST = credentials("reports-host")
+        REPORTS_SSH_USER = credentials("reports-ssh-user")
+        REPORTS_SSH_KEYFILE = credentials("reports-ssh-keyfile")
     }
     stages {
         stage('checkout and build') {
