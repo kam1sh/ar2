@@ -5,12 +5,13 @@ import ar2.services.SessionsService
 import com.github.ajalt.clikt.core.CliktCommand
 import java.time.LocalDateTime
 import org.koin.core.KoinComponent
+import org.koin.core.get
 import org.koin.core.inject
 
 class Maintenance(val app: App) : CliktCommand(), KoinComponent {
-    private val sessionsService: SessionsService by inject()
 
     override fun run() {
+        val sessionsService: SessionsService = get()
         sessionsService.pruneOld(LocalDateTime.now())
     }
 }

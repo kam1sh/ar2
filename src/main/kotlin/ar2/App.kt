@@ -12,10 +12,7 @@ import ar2.services.impl.SecurityServiceImpl
 import ar2.services.impl.SessionsServiceImpl
 import ar2.services.impl.UsersServiceImpl
 import ar2.web.WebHandler
-import ar2.web.views.AuthenticationViews
-import ar2.web.views.GroupViews
-import ar2.web.views.PyPIViews
-import ar2.web.views.UserViews
+import ar2.web.views.*
 import ch.qos.logback.classic.Level
 import ch.qos.logback.classic.LoggerContext
 import com.github.ajalt.clikt.core.CliktCommand
@@ -46,6 +43,7 @@ val modules = module {
     single { UserViews(get()) }
     single { PyPIViews(get()) }
     single { GroupViews(get(), get()) }
+    single { ManagementViews() }
 
     single { WebHandler() }
 }

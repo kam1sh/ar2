@@ -22,17 +22,6 @@ pipeline {
                 always {
                     sh './gradlew allureReport'
                     sh './ci/publish-reports.py'
-/*
-                    publishHTML (target: [
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: false,
-                        keepAll: true,
-                        reportDir: 'build/reports/allure-report/',
-                        reportFiles: 'index.html',
-                        reportName: 'Allure report',
-                        reportTitles: 'Allure report'
-                    ])
- */
                 }
             }
         }

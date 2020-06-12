@@ -12,6 +12,7 @@ import com.github.ajalt.clikt.parameters.options.required
 import java.lang.Exception
 import org.koin.core.KoinComponent
 import org.koin.core.get
+import org.koin.core.inject
 import org.slf4j.LoggerFactory
 
 class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
@@ -21,9 +22,8 @@ class CreateAdmin(val app: App) : CliktCommand(), KoinComponent {
     val username: String by option(help = "Admin username").default("admin")
     val password: String by option().prompt("Enter password", hideInput = true)
 
-    private var usersService: UsersService = get()
-
     override fun run() {
+        val usersService: UsersService = get()
         try {
             usersService.newOrEnable(
                 User(

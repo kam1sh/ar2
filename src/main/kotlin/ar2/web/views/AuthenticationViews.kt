@@ -40,7 +40,7 @@ class AuthenticationViews(
         val session = sessionsService.new(user)
         val cookie = Cookie(cfg.security.cookieName, session.key, expires = session.expires)
         return authResponseLens(
-            AuthResponse("Successfully authenticated as $user."),
+            AuthResponse("Successfully authenticated as ${user.username}."),
             Response(Status.OK).cookie(cookie)
         )
     }

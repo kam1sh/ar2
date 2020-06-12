@@ -3,10 +3,7 @@ package ar2.web
 import ar2.services.SecurityService
 import ar2.services.SessionsService
 import ar2.services.impl.contexts
-import ar2.web.views.AuthenticationViews
-import ar2.web.views.GroupViews
-import ar2.web.views.PyPIViews
-import ar2.web.views.UserViews
+import ar2.web.views.*
 import org.http4k.core.*
 import org.http4k.filter.GzipCompressionMode
 import org.http4k.filter.ServerFilters
@@ -24,6 +21,7 @@ class WebHandler : KoinComponent, HttpHandler {
     private val pyPIViews: PyPIViews by inject()
     private val securityService: SecurityService by inject()
     private val sessionsService: SessionsService by inject()
+    private val managementViews: ManagementViews by inject()
 
     val handler: HttpHandler
 
@@ -45,6 +43,7 @@ class WebHandler : KoinComponent, HttpHandler {
         "/v1/login" bind Method.POST to authenticationViews::authenticateByCredentials,
         "/v1/users" bind securityService.requireSession().then(userViews.views()),
         "/v1/groups" bind securityService.requireSession().then(groupViews.views()),
+        "/v1/mgmt" bind securityService.requireSession().then(managementViews.views()),
         "/py/{group}/{repo}" bind pyPIViews.views()
     ))
 
